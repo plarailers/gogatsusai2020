@@ -1,17 +1,23 @@
 #include <Servo.h>
-const int SENSOR_PIN = 0;
-const int INPUT_PIN = 8;
-int input = 150;//モーターへの入力
-double speed = 0;//車両の速度
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
+
+/*調整する変数--------------------------------*/
+int input = 150;//モーターへの初期入力(0~255)
 double speed_id = 30;//車両の速度目標値(cm/s)
-bool status = 0;
-unsigned int new_time = 0;
-unsigned int old_time = 0;
-int period = 0;//回転周期
-double r = 1.0;//車輪の半径(cm)
 double kp = 3;//比例係数
 double kd = 3;//微分係数
 double ki = 0.1;//積分係数
+/*------------------------------------------*/
+
+const int SENSOR_PIN = 0;
+const int INPUT_PIN = 8;
+double speed = 0;//車両の速度
+bool status = 0;
+unsigned int new_time = 0;
+unsigned int old_time = 0;
+int period = 0;//回転周期(s)
+double r = 1.0;//車輪の半径(cm)
 double e0;//現在の偏差
 double e1;//1つ前の偏差
 double e2;//2つ前の偏差
