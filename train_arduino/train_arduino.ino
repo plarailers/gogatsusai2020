@@ -1,6 +1,4 @@
 #include <Servo.h>
-#include <BluetoothSerial.h>
-BluetoothSerial SerialBT;
 
 /*調整する変数--------------------------------*/
 int input = 150;//モーターへの初期入力(0~255)
