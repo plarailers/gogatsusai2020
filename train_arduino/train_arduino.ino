@@ -1,4 +1,6 @@
 #include <Servo.h>
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT
 
 /*調整する変数--------------------------------*/
 int input = 150;//モーターへの初期入力(0~255)
@@ -8,8 +10,9 @@ double kd = 3;//微分係数
 double ki = 0.01;//積分係数
 /*------------------------------------------*/
 
-const int SENSOR_PIN = 0;
-const int INPUT_PIN = 8;
+char v;
+const int SENSOR_PIN = A6;//ホールセンサーのピン
+const int INPUT_PIN = A15;//モーターのピン
 double speed = 0;//車両の速度
 bool status = 0;
 unsigned int new_time = 0;
@@ -21,8 +24,12 @@ double e1;//1つ前の偏差
 double e2;//2つ前の偏差
 
 void setup() {
-  Serial.begin(9600);
-  pinMode(INPUT_PIN, OUTPUT);
+  Serial.begin(115200);
+  SerialBT.begin("ESP32");
+  ledcSetup(0, 12800, 8);
+  ledcSetup(1, 12800, 8);
+  ledcAttachPin(INPUT_PIN, 1);
+  SerialBT("Start!");
 }
 
 void loop(){
