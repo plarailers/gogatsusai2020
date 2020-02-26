@@ -3,7 +3,7 @@
 BluetoothSerial SerialBT
 
 /*調整する変数--------------------------------*/
-int input = 150;//モーターへの初期入力(0~255)
+int input = 0;//モーターへの初期入力(0~255)
 double speed_id = 30;//車両の速度目標値(cm/s)
 double kp = 3;//比例係数
 double kd = 3;//微分係数
@@ -11,8 +11,8 @@ double ki = 0.01;//積分係数
 /*------------------------------------------*/
 
 char v;
-const int SENSOR_PIN = A6;//ホールセンサーのピン
-const int INPUT_PIN = A15;//モーターのピン
+const int SENSOR_PIN = A6;//ホールセンサーのピンGPIO34
+const int INPUT_PIN = A15;//モーターのピンGPIO12
 double speed = 0;//車両の速度
 bool status = 0;
 unsigned int new_time = 0;
@@ -24,18 +24,16 @@ double e1;//1つ前の偏差
 double e2;//2つ前の偏差
 
 void setup() {
-  Serial.begin(115200);
   SerialBT.begin("ESP32");
-  ledcSetup(0, 12800, 8);
   ledcSetup(1, 12800, 8);
-  ledcAttachPin(INPUT_PIN, 1);
-  SerialBT("Start!");
+  ledcAttachPin(INPUT_PIN, 0);
+  SerialBT.println("Start!");
 }
 
 void loop(){
   
   new_time = millis();
-  digitalWrite(INPUT_PIN, input);
+  ledcWrite(0, input);
   int value = analogRead(SENSOR_PIN);
 
   //磁石がホールセンサーの上にきたら
@@ -43,7 +41,8 @@ void loop(){
     status = 1;
     period = new_time - old_time;
     old_time = new_time;
-    //ここにPCに発信する命令を書く
+    //PCに1周ごとに信号を送る
+    SerialBT.println("c");
   }
   else if (status = 1 && value < 512) {
     status = 0;
