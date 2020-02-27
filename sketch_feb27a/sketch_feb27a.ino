@@ -19,7 +19,7 @@ const int INPUT_PIN = A15;//モーターのピンGPIO12
 double speed;//車両の速度
 int value;//ホールセンサーの値
 bool hole = 0;//ホールセンサーの値valueを0or1に変換
-bool status = 1;//車両の状態。1:進行、0:停止
+bool status = 0;//車両の状態。1:進行、0:停止
 unsigned int new_time = 0;
 unsigned int old_time = 0;
 int period = 0;//回転周期(s)
@@ -61,11 +61,11 @@ void move(double *speed_id) {
     hole = 0;
   }
 
-  SerialBT.print(hole);
-  SerialBT.print(" ");
-  SerialBT.print(speed);
-  SerialBT.print(" ");
-  SerialBT.println(input);
+  Serial.print(hole);
+  Serial.print(" ");
+  Serial.print(speed);
+  Serial.print(" ");
+  Serial.println(input);
   
 }
 
@@ -94,14 +94,15 @@ void setup() {
   ledcSetup(0, 12800, 8);
   ledcAttachPin(INPUT_PIN, 0);
   SerialBT.println("Start!");
+  Serial.begin(9600);
 }
 
 void loop(){
   
   new_time = millis();
 
-  if (SerialBT.available()>0) {
-    v = SerialBT.read();
+  if (Serial.available()>0) {
+    v = Serial.read();
     if (v == 'a') {
       status = 1;
     }
