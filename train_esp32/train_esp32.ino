@@ -2,11 +2,11 @@
 BluetoothSerial SerialBT;
 
 /*調整する変数--------------------------------*/
-int input = 150;//モーターへの初期入力(0~255)
-double speed_id = 30;//車両の速度目標値(cm/s)
-double kp = 3;//比例係数
-double kd = 3;//微分係数
-double ki = 0.01;//積分係数
+int input = 130;//モーターへの初期入力(0~255)
+double speed_id = 40;//車両の速度目標値(cm/s)
+double kp = 1;//比例係数
+double kd = 1;//微分係数
+double ki = 0.001;//積分係数
 /*------------------------------------------*/
 
 char v;
@@ -37,25 +37,27 @@ void move() {
     old_time = new_time;
     //PCに1回転ごとに信号を送る
     SerialBT.println('c');
+
+    //周期periodを速度speedに変換
+    speed = 2000*3.1415926535*r/(double)period;
+    //speedの目標値との偏差を記録
+    e2 = e1;//2つ前の偏差
+    e1 = e0;//1つ前の偏差
+    e0 = speed_id - speed;//現在の偏差
+    //inputを更新
+    input += (int)(kp*e0 + kd*(e0-e1) + ki*(e0+e1+e2));
+    if (input > 255) {
+      input = 255;
+    }
+    else if (input < 80) {
+      input = 80;
+    }
   }
   else if (hole = 1 && value < 512) {
     hole = 0;
   }
 
-  //周期periodを速度speedに変換
-  speed = 2000*3.1415926535*r/(double)period;
-  //speedの目標値との偏差を記録
-  e2 = e1;//2つ前の偏差
-  e1 = e0;//1つ前の偏差
-  e0 = speed_id - speed;//現在の偏差
-  //inputを更新
-  input += (int)(kp*e0 + kd*(e0-e1) + ki*(e0+e1+e2));
-  if (input > 255) {
-    input = 255;
-  }
-  else if (input < 0) {
-    input = 0;
-  }
+  
 }
 
 //停止中
