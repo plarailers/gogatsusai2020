@@ -2,10 +2,10 @@
 BluetoothSerial SerialBT;
 
 /*調整する変数--------------------------------*/
-int input = 80;//モーターへの初期入力(0~255)
+int input = 40;//モーターへの初期入力(0~255)
 int input_max = 255;
 int input_min = 25;
-double speed_id = 50;//車両の速度目標値(cm/s)
+double speed_id = 50;//車両の速度初期目標値(cm/s)
 double speed_max = 100;
 double speed_min = 5;
 double kp = 0.7;//比例係数
@@ -19,7 +19,7 @@ const int INPUT_PIN = A15;//モーターのピンGPIO12
 double speed;//車両の速度
 int value;//ホールセンサーの値
 bool hole = 0;//ホールセンサーの値valueを0or1に変換
-bool status = 1;//車両の状態。1:進行、0:停止
+bool status = 0;//車両の状態。1:進行、0:停止
 unsigned int new_time = 0;
 unsigned int old_time = 0;
 int period = 0;//回転周期(s)
@@ -40,7 +40,7 @@ void move(double *speed_id) {
     period = new_time - old_time;
     old_time = new_time;
     //PCに1回転ごとに信号を送る
-    SerialBT.println('c');
+    SerialBT.println('o');
 
     //周期periodを速度speedに変換
     speed = 2000*3.1415926535*r/(double)period;
@@ -61,11 +61,14 @@ void move(double *speed_id) {
     hole = 0;
   }
 
-  SerialBT.print(hole);
+  //シリアル通信の量が多いとホールセンサの読み取りが不確かになるので消している。
+  /*SerialBT.print(hole);
+  SerialBT.print(" ");
+  SerialBT.print(*speed_id);
   SerialBT.print(" ");
   SerialBT.print(speed);
   SerialBT.print(" ");
-  SerialBT.println(input);
+  SerialBT.println(input);*/
   
 }
 

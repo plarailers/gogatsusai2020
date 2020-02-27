@@ -1,7 +1,7 @@
 import processing.serial.*;
 
 Serial myPort;  // Create object from Serial class
-int val;        // Data received from the serial port
+char val;        // Data received from the serial port
 
 void setup() 
 {
@@ -11,7 +11,7 @@ void setup()
 
 void draw() {
   if (myPort.available() > 0) {
-    val = myPort.read();
+    val = (char)myPort.read();
     println(val);
   }
 }
@@ -25,6 +25,14 @@ void keyPressed() {
     case 'b':
       myPort.write('b');
       println('b');
+      break;
+    case 'c':
+      myPort.write('c');
+      println('c');
+      break;
+    case 'd':
+      myPort.write('d');
+      println('d');
       break;
   }
 }
