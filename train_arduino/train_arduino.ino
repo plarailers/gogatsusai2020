@@ -1,6 +1,6 @@
 /*調整する変数--------------------------------*/
 int input = 130;//モーターへの初期入力(0~255)
-double speed_id = 40;//車両の速度目標値(cm/s)
+double speed_id = 50;//車両の速度目標値(cm/s)
 double kp = 1;//比例係数
 double kd = 1;//微分係数
 double ki = 0.001;//積分係数
