@@ -2,17 +2,27 @@ import processing.serial.*;
 
 Serial myPort;  // Create object from Serial class
 int val;        // Data received from the serial port
-boolean a;
 
 void setup() 
 {
   size(200, 200);
-  myPort = new Serial(this, "arduinoPort", 115200);//Bluetoothのシリアルを選択
+  myPort = new Serial(this, "/dev/cu.Bluetooth-Incoming-Port", 115200);//Bluetoothのシリアルを選択
 }
 
 void draw() {
-  myPort.write('b');              
-  delay(5000);
-  myPort.write('a');           
-  delay(5000);
+  if (myPort.available() > 0) {
+    val = myPort.read();
+    println(val);
+  }
+}
+
+void keyPressed() {
+  switch( key ) {
+    case 'a':
+      myPort.write('a');
+      break;
+    case 'b':
+      myPort.write('b');
+      break;
+  }
 }

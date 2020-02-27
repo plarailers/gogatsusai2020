@@ -24,6 +24,7 @@ double e0;//現在の偏差
 double e1;//1つ前の偏差
 double e2;//2つ前の偏差
 
+/*-------------------------------------------*/
 //進行中に繰り返す
 void move() {
   ledcWrite(0, input);
@@ -35,7 +36,7 @@ void move() {
     period = new_time - old_time;
     old_time = new_time;
     //PCに1回転ごとに信号を送る
-    SerialBT.println("c");
+    SerialBT.println('c');
   }
   else if (hole = 1 && value < 512) {
     hole = 0;
@@ -79,7 +80,7 @@ void loop(){
     if (v == 'a') {
       status = 1;
     }
-    if (v == 'b') {
+    else if (v == 'b') {
       status = 0;
     }
   }
