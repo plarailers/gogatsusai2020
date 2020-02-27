@@ -6,7 +6,9 @@ char val;        // Data received from the serial port
 void setup() 
 {
   size(200, 200);
-  myPort = new Serial(this, "/dev/cu.ESP32-ESP32SPP", 115200);//Bluetoothのシリアルを選択
+  //Bluetoothのシリアルを選択
+  myPort = new Serial(this, "/dev/cu.ESP32-ESP32SPP", 115200);//Mac
+  //myPort = new Serial(this, "COM8", 115200);//Windows
 }
 
 void draw() {
