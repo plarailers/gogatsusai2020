@@ -105,17 +105,15 @@ void loop(){
 
   if (SerialBT.available()>0) {
     v = SerialBT.read();
-    if (v == 'a') {
-      status = 1;
-    }
-    else if (v == 'b') {
-      status = 0;
-    }
-    else if (v == 'c') {
-      accel(&speed_id);
-    }
-    else if (v == 'd') {
-      brake(&speed_id);
+    switch(v) {
+      case 'a':
+        status = 1;
+      case 'b':
+        status = 0;
+      case 'c':
+        accel(&speed_id);
+      case 'd':
+        brake(&speed_id);
     }
   }
 
