@@ -14,8 +14,8 @@ double ki = 0.01;//積分係数
 /*------------------------------------------*/
 
 char v;
-const int SENSOR_PIN = A6;//ホールセンサーのピンGPIO34
-const int INPUT_PIN = A15;//モーターのピンGPIO12
+const int SENSOR_PIN = A0;//ホールセンサーのピンGPIO34
+const int INPUT_PIN = A17;//モーターのピンGPIO12
 double speed;//車両の速度
 int value;//ホールセンサーの値
 bool hole = 0;//ホールセンサーの値valueを0or1に変換
