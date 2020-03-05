@@ -22,11 +22,11 @@ class Timetable {
 
 enum InfoType {
   Arrival,   // 到着
-  Departure  // 発車
+  Departure  // 出発
 }
 
 class Info {
-  InfoType type;  // 到着か発信か
+  InfoType type;  // 到着か出発か
   int time;       // 時刻
   Info(InfoType type, int time) {
     this.type = type;

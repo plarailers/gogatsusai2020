@@ -18,7 +18,6 @@ class Display {
         fill(255,255,255);
         rect(left_rect + width/2,up_rect + height/2,width,height);
         int ms = millis()/1000;
-        println(ms);
         // 以下で電車の座標を決定
         float position = all_rail * position_percentage;
         if (position <= width) {
@@ -33,9 +32,9 @@ class Display {
             x = left_rect + width - (position - width - height);
             y = up_rect + height;
         }
-        else if ((position <= 2 * width + 2 * height){
+        else if (position <= 2 * width + 2 * height){
             x = left_rect;
-            y = up_rect + height - (position - 2 * width + height);
+            y = up_rect + height - (position - 2 * width - height);
         }
         // 電車の描画
         stroke(255, 255, 255);
