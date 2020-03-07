@@ -1,7 +1,7 @@
 class State {
   ArrayList<Junction> junctionList;
   ArrayList<Section> sectionList;
-  Train train;
+  ArrayList<Train> trainList;
   ESP32 esp32;
   State() {
     junctionList = new ArrayList<Junction>();
@@ -13,7 +13,8 @@ class State {
     sectionList.add(new Section(2, 200, 1, 0));
     Section.getById(1).putStation(50);
     Section.getById(2).putStation(100);
-    train = new Train(sectionList.get(0));
+    trainList = new ArrayList<Train>();
+    trainList.add(new Train(sectionList.get(0)));
     esp32 = new ESP32();
   }
 }

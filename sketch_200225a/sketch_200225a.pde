@@ -20,13 +20,12 @@ void draw() {
   state.esp32.updateSimulation();
   while (state.esp32.available() > 0) {
     int delta = state.esp32.read();
-    MoveResult moveResult = state.train.move(delta);
+    MoveResult moveResult = state.trainList.get(0).move(delta);
     if (moveResult == MoveResult.PassedStation) {
       state.esp32.sendStop();
     }
   }
-  display.draw(state.train);
-  text("train : " + state.train.mileage, 600, 450);
+  display.draw(state.trainList.get(0));
   int time = millis();
   // 前回記録した時刻から現在時刻までの発着情報を取得
   for (Info info : timetable.get(prevTime, time)) {
@@ -44,13 +43,13 @@ void keyPressed() {
   }
   // タイヤ回転
   if (key == ' ') {
-    MoveResult moveResult = state.train.move(1);
+    MoveResult moveResult = state.trainList.get(0).move(1);
     if (moveResult == MoveResult.PassedStation) {
       state.esp32.sendStop();
     }
   }
   // 駅に到着
   if (key == ENTER) {
-    state.train.mileage = 0;
+    state.trainList.get(0).mileage = 0;
   }
 }
