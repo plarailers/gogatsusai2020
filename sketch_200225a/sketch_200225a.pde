@@ -31,9 +31,7 @@ void draw() {
 void keyPressed() {
   // タイヤ回転
   if (key == ' ') {
-    state.train.mileage += 1;
-    if (state.train.mileage >= state.section.length) {  // 駅を通過したとき
-      state.train.mileage -= state.section.length;
+    if (state.train.move(1)) {
       state.esp32.sendStop();
     }
   }
