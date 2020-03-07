@@ -55,7 +55,7 @@ class Display2 {
             }
             else if (position <= junction0_y - up_rect + width + height) { //右上から右下に移動
                 x = left_rect + width;
-                y = up_rect + position - (junction0_y - up_rect + width + height);
+                y = up_rect + position - (junction0_y - up_rect + width);
             }
             else { //左下からjunction1に移動
                 x = left_rect;
