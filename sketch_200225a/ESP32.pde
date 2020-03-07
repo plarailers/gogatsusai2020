@@ -1,25 +1,29 @@
 class ESP32 {
   boolean isSimulated;
-  boolean simulatedMoving;
-  int simulatedAvailable;
+  ArrayList<Boolean> simulatedMoving;
+  ArrayList<Byte> simulatedBuffer;
   
   ESP32() {
     isSimulated = false;
-    simulatedMoving = false;
-    simulatedAvailable = 0;
+    simulatedMoving = new ArrayList<Boolean>();
+    simulatedMoving.add(false);
+    simulatedMoving.add(false);
+    simulatedBuffer = new ArrayList<Byte>();
   }
   
   void updateSimulation() {
     if (isSimulated) {
-      if (simulatedMoving) {
-        simulatedAvailable += 1;
+      for (int i = 0; i < simulatedMoving.size(); i++) {
+        if (simulatedMoving.get(i)) {
+          simulatedBuffer.add((byte) i);
+        }
       }
     }
   }
   
   int available() {
     if (isSimulated) {
-      return simulatedAvailable;
+      return simulatedBuffer.size();
     } else {
       return 0;
     }
@@ -27,9 +31,9 @@ class ESP32 {
   
   byte read() {
     if (isSimulated) {
-      if (simulatedAvailable > 0) {
-        simulatedAvailable -= 1;
-        return (byte) random(3);
+      if (simulatedBuffer.size() > 0) {
+        byte id = simulatedBuffer.remove(0);
+        return id;
       } else {
         return 0;
       }
@@ -38,16 +42,16 @@ class ESP32 {
     }
   }
   
-  void sendGo() {
+  void sendGo(int id) {
     if (isSimulated) {
-      simulatedMoving = true;
+      simulatedMoving.set(id, true);
       println("< GO");
     }
   }
   
-  void sendStop() {
+  void sendStop(int id) {
     if (isSimulated) {
-      simulatedMoving = false;
+      simulatedMoving.set(id, false);
       println("< STOP");
     }
   }

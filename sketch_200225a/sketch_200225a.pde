@@ -19,10 +19,11 @@ int prevTime = -1;
 void draw() {
   state.esp32.updateSimulation();
   while (state.esp32.available() > 0) {
-    int delta = state.esp32.read();
-    MoveResult moveResult = state.trainList.get(0).move(delta);
+    int id = state.esp32.read();
+    int delta = (int) random(1, 3);
+    MoveResult moveResult = state.trainList.get(id).move(delta);
     if (moveResult == MoveResult.PassedStation) {
-      state.esp32.sendStop();
+      state.esp32.sendStop(id);
     }
   }
   display.draw(state.trainList);
@@ -30,7 +31,8 @@ void draw() {
   // 前回記録した時刻から現在時刻までの発着情報を取得
   for (Info info : timetable.get(prevTime, time)) {
     if (info.isDeparture()) {  // 出発
-      state.esp32.sendGo();
+      state.esp32.sendGo(0);
+      state.esp32.sendGo(1);
     }
   }
   prevTime = time;
@@ -45,7 +47,7 @@ void keyPressed() {
   if (key == ' ') {
     MoveResult moveResult = state.trainList.get(0).move(1);
     if (moveResult == MoveResult.PassedStation) {
-      state.esp32.sendStop();
+      state.esp32.sendStop(0);
     }
   }
   // 駅に到着

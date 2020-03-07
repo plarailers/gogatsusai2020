@@ -14,7 +14,8 @@ class State {
     Section.getById(1).putStation(50);
     Section.getById(2).putStation(100);
     trainList = new ArrayList<Train>();
-    trainList.add(new Train(sectionList.get(0)));
+    trainList.add(new Train(sectionList.get(1), 50));
+    trainList.add(new Train(sectionList.get(2), 100));
     esp32 = new ESP32();
   }
 }
@@ -29,8 +30,9 @@ class Train {
   int mileage = 0;
   Section currentSection;
   
-  Train(Section initialSection) {
+  Train(Section initialSection, int initialPosition) {
     currentSection = initialSection;
+    mileage = initialPosition;
   }
   
   // 返り値：現在の区間の何割のところにいるか [0, 1)
