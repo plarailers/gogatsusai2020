@@ -52,7 +52,7 @@ void setup() {
 int prevTime = -1;
 
 void draw() {
-  display.draw(state.train.getPosition());
+  display.draw(state.train);
   text("train : " + state.train.mileage, 600, 450);
   int time = millis();
   // 前回記録した時刻から現在時刻までの発着情報を取得

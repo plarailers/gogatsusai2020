@@ -12,14 +12,14 @@ class Display {
     textSize(30); // 文字の大きさ
 
     }
-    void draw(float position_percentage){ //double position_percentage = 電車の位置のパーセント表記
+    void draw(Train state_train){ //double position_percentage = 電車の位置のパーセント表記
         background(240);
         stroke(0);
         fill(255,255,255);
         rect(left_rect + width/2,up_rect + height/2,width,height);
         int ms = millis()/1000;
         // 以下で電車の座標を決定
-        float position = all_rail * position_percentage;
+        float position = all_rail * state_train.getPosition();
         if (position <= width) {
             x = left_rect + position;
             y = up_rect;
