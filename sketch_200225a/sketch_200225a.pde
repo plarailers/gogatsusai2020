@@ -25,7 +25,7 @@ void draw() {
       state.esp32.sendStop();
     }
   }
-  display.draw(state.trainList.get(0));
+  display.draw(state.trainList);
   int time = millis();
   // 前回記録した時刻から現在時刻までの発着情報を取得
   for (Info info : timetable.get(prevTime, time)) {
