@@ -57,9 +57,13 @@ class Display2 {
                 x = left_rect + width;
                 y = up_rect + position - (junction0_y - up_rect + width);
             }
+            else if (position <= junction0_y - up_rect + 2*width + height) {
+                x = left_rect + width - (position - (junction0_y - up_rect + width + height));
+                y = up_rect + height;
+            }
             else { //左下からjunction1に移動
                 x = left_rect;
-                y = up_rect + height - position - (junction0_y - up_rect + 2 * width + height);
+                y = up_rect + height - (position - (junction0_y - up_rect + 2 * width + height));
             }
         }
         else if (section_id == 1) {
