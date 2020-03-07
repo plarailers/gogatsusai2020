@@ -33,6 +33,7 @@ class Display2 {
     int len_section0 = 2*width + 2*height - station_height; //セクション0の長さ
     int len_section1 = station_height;
     int len_section2 = station_height + 2*station_width;
+    int space = 20;
     void setup(){
         textSize(30); // 文字の大きさ
 
@@ -48,6 +49,7 @@ class Display2 {
         line(node4.x, node4.y, node5.x, node5.y); //ここから駅
         line(node5.x, node5.y, node6.x, node6.y);
         line(node6.x, node6.y, node7.x, node7.y);
+        rect((node0.x + node5.x)/2, (node0.y + node3.y)/2, station_width - space, station_height - space);
         
         int ms = millis()/1000;
         // 以下で電車の座標を決定
