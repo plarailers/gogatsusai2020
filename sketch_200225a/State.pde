@@ -11,9 +11,17 @@ class State {
     sectionList.add(new Section(0, 400, 0, 1));
     sectionList.add(new Section(1, 100, 1, 0));
     sectionList.add(new Section(2, 200, 1, 0));
+    Section.getById(1).putStation(50);
+    Section.getById(2).putStation(100);
     train = new Train(sectionList.get(0));
     esp32 = new ESP32();
   }
+}
+
+enum MoveResult {
+  None,
+  PassedJunction,
+  PassedStation
 }
 
 class Train {
@@ -32,15 +40,22 @@ class Train {
   
   // 引数：タイヤの回転数
   // 返り値：新しい区間に移ったかどうか
-  boolean move(int delta) {
+  MoveResult move(int delta) {
+    int prevMileage = mileage;
     mileage += delta;
-    if (mileage >= currentSection.length) {  // 駅を通過したとき
+    if (mileage >= currentSection.length) {  // 分岐点を通過したとき
       mileage -= currentSection.length;
       currentSection = currentSection.targetJunction.getPointedSection();
       currentSection.sourceJunction.toggle();
-      return true;
+      return MoveResult.PassedJunction;
     }
-    return false;
+    if (currentSection.hasStation) {
+      int stationPosition = currentSection.stationPosition;
+      if (prevMileage < stationPosition && stationPosition <= mileage) {  // 駅を通過したとき
+        return MoveResult.PassedStation;
+      }
+    }
+    return MoveResult.None;
   }
 }
 
@@ -78,18 +93,37 @@ static class Junction {
   }
 }
 
-class Section {
+static class Section {
+  static ArrayList<Section> all = new ArrayList<Section>();
+  
   int id;
   int length = 0;
   Junction sourceJunction;
   Junction targetJunction;
+  boolean hasStation = false;
+  int stationPosition = 0;
   
   Section(int id, int length, int sourceId, int targetId) {
+    all.add(this);
     this.id = id;
     this.length = length;
     this.sourceJunction = Junction.getById(sourceId);
     this.sourceJunction.outSectionList.add(this);
     this.targetJunction = Junction.getById(targetId);
     this.targetJunction.inSectionList.add(this);
+  }
+  
+  void putStation(int stationPosition) {
+    this.hasStation = true;
+    this.stationPosition = stationPosition;
+  }
+  
+  static Section getById(int id) {
+    for (Section s : all) {
+      if (s.id == id) {
+        return s;
+      }
+    }
+    return null;
   }
 }

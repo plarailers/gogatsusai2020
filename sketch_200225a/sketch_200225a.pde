@@ -20,7 +20,8 @@ void draw() {
   state.esp32.updateSimulation();
   while (state.esp32.available() > 0) {
     int delta = state.esp32.read();
-    if (state.train.move(delta)) {
+    MoveResult moveResult = state.train.move(delta);
+    if (moveResult == MoveResult.PassedStation) {
       state.esp32.sendStop();
     }
   }
@@ -43,7 +44,8 @@ void keyPressed() {
   }
   // タイヤ回転
   if (key == ' ') {
-    if (state.train.move(1)) {
+    MoveResult moveResult = state.train.move(1);
+    if (moveResult == MoveResult.PassedStation) {
       state.esp32.sendStop();
     }
   }
