@@ -1,9 +1,11 @@
 class State {
   Train train;
   Section section;
+  ESP32 esp32;
   State() {
     train = new Train();
     section = new Section(100);
+    esp32 = new ESP32();
   }
 }
 
