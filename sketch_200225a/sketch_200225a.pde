@@ -11,11 +11,19 @@ void setup() {
   display = new Display2();
   timetable = new Timetable();
   display.setup();
+  state.esp32.isSimulated = true;
 }
 
 int prevTime = -1;
 
 void draw() {
+  state.esp32.updateSimulation();
+  while (state.esp32.available() > 0) {
+    int delta = state.esp32.read();
+    if (state.train.move(delta)) {
+      state.esp32.sendStop();
+    }
+  }
   display.draw(state.train);
   text("train : " + state.train.mileage, 600, 450);
   int time = millis();
@@ -29,6 +37,10 @@ void draw() {
 }
 
 void keyPressed() {
+  // シミュレーションモード
+  if (key == 's') {
+    state.esp32.isSimulated = !state.esp32.isSimulated;
+  }
   // タイヤ回転
   if (key == ' ') {
     if (state.train.move(1)) {

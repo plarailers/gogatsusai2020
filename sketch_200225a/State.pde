@@ -8,12 +8,11 @@ class State {
     junctionList.add(new Junction(0));
     junctionList.add(new Junction(1));
     sectionList = new ArrayList<Section>();
-    sectionList.add(new Section(0, 80, 0, 1));
-    sectionList.add(new Section(1, 20, 1, 0));
-    sectionList.add(new Section(2, 20, 1, 0));
+    sectionList.add(new Section(0, 400, 0, 1));
+    sectionList.add(new Section(1, 100, 1, 0));
+    sectionList.add(new Section(2, 200, 1, 0));
     train = new Train(sectionList.get(0));
     esp32 = new ESP32();
-    esp32.simulate();
   }
 }
 
