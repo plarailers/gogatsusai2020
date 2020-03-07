@@ -38,7 +38,7 @@ class Display {
         textSize(30); // 文字の大きさ
 
     }
-    void draw(Train state_train){ //double position_percentage = 電車の位置のパーセント表記
+    void draw(ArrayList<Train> state_train_list){ //double position_percentage = 電車の位置のパーセント表記
         background(240);
         stroke(0);
         fill(255,255,255);
@@ -53,56 +53,58 @@ class Display {
         
         int ms = millis()/1000;
         // 以下で電車の座標を決定
-        int section_id = state_train.currentSection.id;
-        int len = state_train.currentSection.length;
-        float position;
-        if (section_id == 0) {
-            position = len_section0 * state_train.getPosition();
-            if (position <= node7.y - node0.y) { //junction0から上に移動
-                tmp = node7.y - position;
-                train_position.set(node0.x, tmp);
+        for (Train state_train : state_train_list) {
+            int section_id = state_train.currentSection.id;
+            int len = state_train.currentSection.length;
+            float position;
+            if (section_id == 0) {
+                position = len_section0 * state_train.getPosition();
+                if (position <= node7.y - node0.y) { //junction0から上に移動
+                    tmp = node7.y - position;
+                    train_position.set(node0.x, tmp);
+                }
+                else if (position <= node7.y - node0.y + width) { //左上から右上に移動
+                    tmp = position - (node7.y - node0.y);
+                    train_position.set(node0.x + tmp, node0.y);
+                }
+                else if (position <= node7.y - node0.y + width + height) { //右上から右下に移動
+                    tmp = position - (node7.y - node0.y + width);
+                    train_position.set(node1.x, node1.y + tmp);
+                }
+                else if (position <= node7.y - node0.y + 2*width + height) { //右下から左下に移動
+                    tmp = position - (node7.y - node0.y + width + height);
+                    train_position.set(node2.x - tmp, node2.y);
+                }
+                else { //左下からjunction1に移動
+                    tmp = position - (node7.y - node0.y + 2*width + height);
+                    train_position.set(node3.x, node3.y - tmp);
+                }
             }
-            else if (position <= node7.y - node0.y + width) { //左上から右上に移動
-                tmp = position - (node7.y - node0.y);
-                train_position.set(node0.x + tmp, node0.y);
+            else if (section_id == 1) {
+                position = len_section1 * state_train.getPosition();
+                train_position.set(node4.x, node4.y - position);
             }
-            else if (position <= node7.y - node0.y + width + height) { //右上から右下に移動
-                tmp = position - (node7.y - node0.y + width);
-                train_position.set(node1.x, node1.y + tmp);
+            else if (section_id == 2) {
+                position = len_section2 * state_train.getPosition();
+                if (position <= station_width) {
+                    tmp = position;
+                    train_position.set(node4.x - tmp, node4.y);
+                }
+                else if (position <= station_width + station_height) {
+                    tmp = position - station_width;
+                    train_position.set(node5.x, node5.y - tmp);
+                }
+                else {
+                    tmp = position - (station_width + station_height);
+                    train_position.set(node6.x + tmp, node6.y);
+                }
             }
-            else if (position <= node7.y - node0.y + 2*width + height) { //右下から左下に移動
-                tmp = position - (node7.y - node0.y + width + height);
-                train_position.set(node2.x - tmp, node2.y);
-            }
-            else { //左下からjunction1に移動
-                tmp = position - (node7.y - node0.y + 2*width + height);
-                train_position.set(node3.x, node3.y - tmp);
-            }
+            // 電車の描画
+            stroke(255, 255, 255);
+            fill(0);
+            rectMode(CENTER);
+            rect(train_position.x,train_position.y,train,train);
         }
-        else if (section_id == 1) {
-            position = len_section1 * state_train.getPosition();
-            train_position.set(node4.x, node4.y - position);
-        }
-        else if (section_id == 2) {
-            position = len_section2 * state_train.getPosition();
-            if (position <= station_width) {
-                tmp = position;
-                train_position.set(node4.x - tmp, node4.y);
-            }
-            else if (position <= station_width + station_height) {
-                tmp = position - station_width;
-                train_position.set(node5.x, node5.y - tmp);
-            }
-            else {
-                tmp = position - (station_width + station_height);
-                train_position.set(node6.x + tmp, node6.y);
-            }
-        }
-        // 電車の描画
-        stroke(255, 255, 255);
-        fill(0);
-        rectMode(CENTER);
-        rect(train_position.x,train_position.y,train,train);
         // 時刻の描画
         fill(0);
         count = base + ms;
