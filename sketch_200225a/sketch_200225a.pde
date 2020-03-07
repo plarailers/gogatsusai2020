@@ -31,8 +31,7 @@ void draw() {
   // 前回記録した時刻から現在時刻までの発着情報を取得
   for (Info info : timetable.get(prevTime, time)) {
     if (info.isDeparture()) {  // 出発
-      state.esp32.sendGo(0);
-      state.esp32.sendGo(1);
+      state.esp32.sendGo(info.trainId);
     }
   }
   prevTime = time;

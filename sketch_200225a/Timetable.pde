@@ -3,8 +3,8 @@ class Timetable {
   Timetable() {
     infoList = new ArrayList<Info>();
     // （仮）10秒ごとに発車
-    for (int i = 0; i < 10; i++) {
-      infoList.add(new Info(InfoType.Departure, 10000 * i));
+    for (int i = 0; i < 20; i++) {
+      infoList.add(new Info(InfoType.Departure, 5000 * i, i % 2));
     }
   }
   
@@ -28,9 +28,11 @@ enum InfoType {
 class Info {
   InfoType type;  // 到着か出発か
   int time;       // 時刻
-  Info(InfoType type, int time) {
+  int trainId;    // 列車ID
+  Info(InfoType type, int time, int trainId) {
     this.type = type;
     this.time = time;
+    this.trainId = trainId;
   }
   
   boolean isArrival() {
