@@ -1,5 +1,5 @@
 State state;
-Display2 display;
+Display display;
 Timetable timetable;
 
 void settings() {
@@ -8,7 +8,7 @@ void settings() {
 
 void setup() {
   state = new State();
-  display = new Display2();
+  display = new Display();
   timetable = new Timetable();
   display.setup();
   state.esp32.isSimulated = true;
