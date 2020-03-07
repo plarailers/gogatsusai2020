@@ -13,7 +13,7 @@ class Node {
     }
 }
 
-class Display2 {
+class Display {
     int base = 0; // 初期時間
     int count; //スタートしてから経過した時間
     Node train_position = new Node(150, 100);//電車の初期位置
