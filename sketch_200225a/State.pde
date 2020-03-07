@@ -37,7 +37,8 @@ class Train {
     mileage += delta;
     if (mileage >= currentSection.length) {  // 駅を通過したとき
       mileage -= currentSection.length;
-      currentSection = currentSection.targetJunction.outSectionList.get(0);
+      currentSection = currentSection.targetJunction.getPointedSection();
+      currentSection.sourceJunction.toggle();
       return true;
     }
     return false;
@@ -50,12 +51,22 @@ static class Junction {
   int id;
   ArrayList<Section> inSectionList;
   ArrayList<Section> outSectionList;
+  int outSectionIndex;
   
   Junction(int id) {
     all.add(this);
     this.id = id;
     inSectionList = new ArrayList<Section>();
     outSectionList = new ArrayList<Section>();
+    outSectionIndex = 0;
+  }
+  
+  void toggle() {
+    outSectionIndex = (outSectionIndex + 1) % outSectionList.size();
+  }
+  
+  Section getPointedSection() {
+    return outSectionList.get(outSectionIndex);
   }
   
   static Junction getById(int id) {
