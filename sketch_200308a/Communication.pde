@@ -1,21 +1,27 @@
+import java.util.Queue;
+import java.util.ArrayDeque;
+import java.util.Map;
+
 class Communication {
   boolean isSimulated;
-  ArrayList<Boolean> simulatedMoving;
-  ArrayList<Byte> simulatedBuffer;
+  HashMap<Integer, Integer> simulatedSpeed;
+  Queue<Byte> simulatedBuffer;
   
   Communication() {
     isSimulated = false;
-    simulatedMoving = new ArrayList<Boolean>();
-    simulatedMoving.add(true);
-    simulatedMoving.add(true);
-    simulatedBuffer = new ArrayList<Byte>();
+    simulatedSpeed = new HashMap<Integer, Integer>();
+    simulatedSpeed.put(0, 255);
+    simulatedSpeed.put(1, 255);
+    simulatedBuffer = new ArrayDeque<Byte>();
   }
   
   void updateSimulation() {
     if (isSimulated) {
-      for (int i = 0; i < simulatedMoving.size(); i++) {
-        if (simulatedMoving.get(i)) {
-          simulatedBuffer.add((byte) i);
+      for(Map.Entry<Integer, Integer> entry : simulatedSpeed.entrySet()) {
+        int trainId = entry.getKey();
+        int speed = entry.getValue();
+        if (speed > 0) {
+          simulatedBuffer.add((byte) trainId);
         }
       }
     }
@@ -32,7 +38,7 @@ class Communication {
   byte read() {
     if (isSimulated) {
       if (simulatedBuffer.size() > 0) {
-        byte id = simulatedBuffer.remove(0);
+        byte id = simulatedBuffer.remove();
         return id;
       } else {
         return 0;
@@ -42,17 +48,19 @@ class Communication {
     }
   }
   
-  void sendGo(int id) {
-    if (isSimulated) {
-      simulatedMoving.set(id, true);
-      println(id + "< GO");
-    }
+  void write(byte data) {
   }
   
-  void sendStop(int id) {
+  void sendSpeed(int trainId, int speed) {
     if (isSimulated) {
-      simulatedMoving.set(id, false);
-      println(id + "< STOP");
+      simulatedSpeed.put(trainId, speed);
     }
+    write((byte) 'T');
+    write((byte) speed);
+  }
+  
+  void sendToggle(int junctionId) {
+    write((byte) 'J');
+    write((byte) junctionId);
   }
 }

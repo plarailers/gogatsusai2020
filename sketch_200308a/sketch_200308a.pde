@@ -33,12 +33,14 @@ void draw() {
     int targetSpeed = getTargetSpeed(train);
     MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed/20);  // 適当な距離進ませる
     timetableUpdate(train, targetSpeed, moveResult);  // 時刻表を更新する
+    communication.sendSpeed(train.id, targetSpeed);
   }
 
   // 各ポイントについて行う
   for (Junction junction : state.junctionList) {
     if (junctionControl(junction)) {  // ポイントを切り替えるべきか判定
       Junction.getById(junction.id).toggle();  // ポイントを切り替える
+      communication.sendToggle(junction.id);
     }
   }
   
