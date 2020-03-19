@@ -25,8 +25,8 @@ class State {
     Station.getById(1).setTrack(1, 4, 100);  // 駅1の1番線はsection4
     Station.getById(1).setTrack(2, 5, 100);  // 駅1の2番線はsection5
     trainList = new ArrayList<Train>();
-    trainList.add(new Train(Station.getById(0).trackList.get(1), 20));  // 駅0の1番線に配置
-    trainList.add(new Train(Station.getById(0).trackList.get(2), 20));  // 駅0の1番線に配置
+    trainList.add(new Train(Station.getById(0).trackList.get(1), 50));  // 駅0の1番線に配置
+    trainList.add(new Train(Station.getById(0).trackList.get(2), 50));  // 駅0の2番線に配置
     esp32 = new ESP32();
   }
 }
@@ -38,6 +38,7 @@ enum MoveResult {
 }
 
 class Train {
+  int id;
   int mileage = 0;
   Section currentSection;
   
@@ -60,7 +61,6 @@ class Train {
     if (mileage >= currentSection.length) {  // 分岐点を通過したとき
       mileage -= currentSection.length;
       currentSection = currentSection.targetJunction.getPointedSection();
-      // currentSection.sourceJunction.toggle();
       return MoveResult.PassedJunction;
     }
     if (currentSection.hasStation) {
@@ -101,6 +101,10 @@ static class Junction {
   
   Section getPointedSection() {
     return outSectionList.get(outSectionIndex);
+  }
+
+  Section getInSection() {
+    return inSectionList.get(inSectionIndex);
   }
   
   static Junction getById(int id) {
@@ -166,6 +170,17 @@ static class Station {
     Section.getById(sectionId).putStation(stationPosition);  // 駅の追加
     this.trackList.put(trackId, Section.getById(sectionId));  // 番線と紐づけ
   }
+
+  int getTrackIdBySection(Section section) {
+    for (Station station : all) {
+      for (int i = 1; i <= station.trackList.size(); i++) {
+        if (station.trackList.get(i).id == section.id) {
+          return i;
+        }
+      }
+    }
+    return 0;
+  }
   
   static Station getById(int id) {
     for (Station s : all) {
@@ -174,5 +189,14 @@ static class Station {
       }
     }
     return null;
+  }
+}
+
+class StopPoint {  // 停止点情報
+  Section section;
+  int mileage;
+  StopPoint(Section section, int mileage) {
+    this.section = section;
+    this.mileage = mileage;
   }
 }
