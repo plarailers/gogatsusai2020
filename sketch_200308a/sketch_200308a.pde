@@ -1,6 +1,7 @@
 State state;
 Timetable timetable;
 Display display;
+Communication communication;
 
 void settings() {
   size(1000, 500);
@@ -12,10 +13,11 @@ void setup() {
   timetable = new Timetable();
   display = new Display();
   display.setup();
-  state.esp32.isSimulated = true;
-  state.esp32.updateSimulation();
-  while (state.esp32.available() > 0) {  // 各列車について行う
-    int id = state.esp32.read();  // 列車id取得
+  communication = new Communication();
+  communication.isSimulated = true;
+  communication.updateSimulation();
+  while (communication.available() > 0) {  // 各列車について行う
+    int id = communication.read();  // 列車id取得
     state.trainList.get(id).id = id;  // 当該列車を取得
   }
 }
@@ -24,7 +26,7 @@ int prevTime = -1;
 int time = 0;
 
 void draw() {
-  state.esp32.updateSimulation();
+  communication.updateSimulation();
 
   // 各列車について行う
   for (Train train : state.trainList) {
