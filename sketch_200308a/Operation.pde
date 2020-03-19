@@ -2,6 +2,44 @@
 static final int STOPMERGIN = 20;  // Junctionの何m手前で停止するか
 static final int TRAINLENGTH = 30;  // 列車1編成の長さ
 
+// 【時刻表更新】moveResultを受け取って、時刻表を更新する
+void timetableUpdate(Train train, int targetSpeed, MoveResult moveResult) {
+  int id = train.id;
+
+  // 出発処理
+  if (timetable.getByTrainId(id).isDeparture() && targetSpeed > 0) {
+    timetable.getByTrainId(id).used = true;  // 出発済に変更
+    println("train" + id + ": Departed");
+  // 到着処理
+  } else if (timetable.getByTrainId(id).isArrival()) {
+    if (moveResult == MoveResult.PassedStation) {
+      state.trainList.get(id).mileage = train.currentSection.stationPosition;  // 停止位置を合わせる
+      timetable.getByTrainId(id).used = true;  // 到着済に変更
+      println("train" + id + ": Arrived");
+    }
+  // 通過処理
+  } else if (timetable.getByTrainId(id).isPassage()) {
+    if (moveResult == MoveResult.PassedStation) {
+      timetable.getByTrainId(id).used = true;  // 通過済に変更
+      println("train" + id + ": Passed");
+    }
+  }
+
+}
+
+// 【列車制御】指定された列車の速度を返す
+// とりあえず、255か0で返します
+int getTargetSpeed(Train me) {
+  StopPoint stopPoint = getStopPoint(me);  // 停止点取得
+  if (stopPoint.section != me.currentSection || me.mileage < stopPoint.mileage) {
+    println("time="+time+" trainId="+me.id+" StopPoint=Section"+stopPoint.section.id+":"+stopPoint.mileage);
+    return 255;
+  } else {
+    println("time="+time+" trainId="+me.id+" StopPoint=Section"+stopPoint.section.id+":"+stopPoint.mileage);
+    return 0;
+  }
+}
+
 // 【列車制御】指定された列車の停止点を返す
 StopPoint getStopPoint(Train me) {
   Info info = timetable.getByTrainId(me.id);
@@ -47,56 +85,69 @@ StopPoint getStopPoint(Train me) {
 }
 
 // 【ポイント制御】時刻表に応じて各Junctuionをまとめて制御する
-void junctionControl() {
-  for (Junction junction : state.junctionList) {
-    Section inSection = junction.getInSection();
-    Section outSection = junction.getPointedSection();
+Boolean junctionControl(Junction junction) {
+  Section inSection = junction.getInSection();
+  Section outSection = junction.getPointedSection();
+  
+  // 列車が分岐器上にいないときに操作を行う
+  Train trainOnJunction = detectTrain(outSection);
+  if (trainOnJunction == null || trainOnJunction.mileage > TRAINLENGTH) {
     
-    // 列車が分岐器上にいないときに操作を行う
-    Train trainOnJunction = detectTrain(outSection);
-    if (trainOnJunction == null || trainOnJunction.mileage > TRAINLENGTH) {
-      
-      // in1->out2 という分岐器の場合、到着する列車の番線に合わせる
-      if (junction.inSectionList.size() == 1 && junction.outSectionList.size() > 1) {
-        Train inTrain = detectTrain(junction.getInSection());  // 分岐器へ進入する列車を取得
-        if (inTrain != null) {  // 列車が近づいて来ているとき
-          Info info = timetable.getByTrainId(inTrain.id);  // 近づいてくる列車の時刻情報を取得
-          Section arrTrack = Station.getById(info.stationId).trackList.get(info.trackId);  // 近づいてくる列車の着発番線を取得
-          while (arrTrack.id != junction.getPointedSection().id) {  // 到着番線と、現在開通している番線が違えば、合わせる
-            Junction.getById(junction.id).toggle();
-            println("toggled:Junction" + junction.id);
+    // in1->out2 という分岐器の場合、到着する列車の番線に合わせる
+    if (junction.inSectionList.size() == 1 && junction.outSectionList.size() > 1) {
+      Train inTrain = detectTrain(junction.getInSection());  // 分岐器へ進入する列車を取得
+      if (inTrain != null) {  // 列車が近づいて来ているとき
+        Info info = timetable.getByTrainId(inTrain.id);  // 近づいてくる列車の時刻情報を取得
+        Section arrTrack = Station.getById(info.stationId).trackList.get(info.trackId);  // 近づいてくる列車の着発番線を取得
+        if (arrTrack.id != junction.getPointedSection().id) {  // 到着番線と、現在開通している番線が違えば、合わせる
+          println("Junction" + junction.id+":Toggled");
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+
+    // in2->out1 という分岐器の場合、
+    } else if (junction.inSectionList.size() > 1 && junction.outSectionList.size() == 1) {
+      // 現在開通している進路に列車がいる場合、この列車がいなくなるまで分岐器が動かないよう鎖錠
+      Train inTrain = detectTrain(junction.getInSection());  // 分岐器開通方向の列車を取得
+      if (inTrain != null) {
+        // 鎖錠
+        // println("Junction"+junction.id+":接近鎖錠中");
+        return false;
+      } else {
+        // 鎖錠しない場合、最も早く出発or通過する列車の番線に合わせる
+        Station station = getBelongStation(junction);  // junctionが属する駅を取得
+        Info info = timetable.getDepartureByTrackId(station.id, station.getTrackIdBySection(inSection));  // とりあえず現在開通している番線の出発時刻情報を取得
+        for (Section section : junction.inSectionList) {
+          Info tmpInfo = timetable.getDepartureByTrackId(station.id, station.getTrackIdBySection(section));  // 各inSectionの到着時刻情報を取得
+          if (info != null && tmpInfo != null && tmpInfo.time < info.time) {  // tmpInfo.timeのほうが早ければinfoを更新
+            info = tmpInfo;
+          } else if (info == null && tmpInfo != null) {
+            info = tmpInfo;
           }
         }
-
-      // in2->out1 という分岐器の場合、
-      } else if (junction.inSectionList.size() > 1 && junction.outSectionList.size() == 1) {
-        // 現在開通している進路に列車がいる場合、この列車がいなくなるまで分岐器が動かないよう鎖錠
-        Train inTrain = detectTrain(junction.getInSection());  // 分岐器開通方向の列車を取得
-        if (inTrain != null) {
-          // 鎖錠
-          println("鎖錠:Junction"+junction.id);
+        if (info != null) {  // <-このinfoは、最も早く出発or通過する列車の時刻情報
+          if (junction.getInSection().id != station.trackList.get(info.trackId).id) {  // 出発番線と、現在開通している番線が異なれば、合わせる
+            println("Junction" + junction.id+":Toggled");
+            return true;
+          } else {
+            return false;
+          }
         } else {
-          // 鎖錠しない場合、最も早く出発or通過する列車の番線に合わせる
-          Station station = getBelongStation(junction);  // junctionが属する駅を取得
-          Info info = timetable.getDepartureByTrackId(station.id, station.getTrackIdBySection(inSection));  // とりあえず現在開通している番線の出発時刻情報を取得
-          for (Section section : junction.inSectionList) {
-            Info tmpInfo = timetable.getDepartureByTrackId(station.id, station.getTrackIdBySection(section));  // 各inSectionの到着時刻情報を取得
-            if (info != null && tmpInfo != null && tmpInfo.time < info.time) {  // tmpInfo.timeのほうが早ければinfoを更新
-              info = tmpInfo;
-            } else if (info == null && tmpInfo != null) {
-              info = tmpInfo;
-            }
-          }
-          if (info != null) {  // <-このinfoは、最も早く出発or通過する列車の時刻情報
-            while (junction.getInSection().id != station.trackList.get(info.trackId).id) {  // 出発番線と、現在開通している番線が異なれば、合わせる
-              Junction.getById(junction.id).toggle();
-              println("toggled:Junction" + junction.id);
-            }
-          }
+          return false;
         }
       }
+    } else {
+      return false;
     }
+  } else {
+    // println("Junction"+junction.id+":轍鎖鎖錠中");
+    return false;
   }
+  
 }  
 
 // 先行列車位置と分岐器の方向を基に、列車meが進んでよいsectionを返す

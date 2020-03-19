@@ -25,36 +25,22 @@ int time = 0;
 
 void draw() {
   state.esp32.updateSimulation();
-  while (state.esp32.available() > 0) {  // 各列車について行う
-    int id = state.esp32.read();  // 列車id取得
-    Train train = state.trainList.get(id);  // 当該列車を取得
 
-    StopPoint stopPoint = getStopPoint(train);  // 停止点を取得
-  
-    if (stopPoint.section != train.currentSection || train.mileage < stopPoint.mileage) {
-      int delta = (int) random(10,15);  // ランダムな距離進ませる
-      MoveResult moveResult = state.trainList.get(id).move(delta);
-      
-      // 出発処理
-      if (timetable.getByTrainId(id).isDeparture()) {
-        timetable.getByTrainId(id).used = true;  // 出発済に変更
-        println("train" + id + " Departed");
-      }
-      
-      // 到着・通過処理
-      if (moveResult == MoveResult.PassedStation) {
-        if (timetable.getByTrainId(id).isArrival()) {  // 到着なら停止位置を合わせる
-          state.trainList.get(id).mileage = train.currentSection.stationPosition;
-        }
-        timetable.getByTrainId(id).used = true;  // 到着・通過済に変更
-      }
-    }
-
-    println("time=" + time + ", trainId=" + id + ", section=" + train.currentSection.id + ", mileage=" + train.mileage + ", stopPoint=Section" + stopPoint.section.id + ":" + stopPoint.mileage);
+  // 各列車について行う
+  for (Train train : state.trainList) {
+    int targetSpeed = getTargetSpeed(train);
+    MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed/20);  // 適当な距離進ませる
+    timetableUpdate(train, targetSpeed, moveResult);  // 時刻表を更新する
   }
 
-  junctionControl();  // ポイント制御
-
+  // 各ポイントについて行う
+  for (Junction junction : state.junctionList) {
+    if (junctionControl(junction)) {  // ポイントを切り替えるべきか判定
+      Junction.getById(junction.id).toggle();  // ポイントを切り替える
+    }
+  }
+  
+  // 描画
   display.draw(state);
   
   try{  // 一定時間待つ
