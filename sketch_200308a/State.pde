@@ -40,6 +40,7 @@ enum MoveResult {
 class Train {
   int id;
   int mileage = 0;
+  int targetSpeed = 0;
   Section currentSection;
   
   Train(Section initialSection, int initialPosition) {
@@ -180,6 +181,17 @@ static class Station {
       }
     }
     return 0;
+  }
+
+  static Station getBySection(Section section) {
+    for (Station s : all) {
+      for (int i = 1; i <= s.trackList.size(); i++) {
+        if (s.trackList.get(i).id == section.id) {
+          return s;
+        }
+      }
+    }
+    return null;
   }
   
   static Station getById(int id) {

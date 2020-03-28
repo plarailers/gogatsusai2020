@@ -25,12 +25,13 @@ int time = 0;
 
 void draw() {
   state.esp32.updateSimulation();
+  println("time=" + time);
 
   // 各列車について行う
   for (Train train : state.trainList) {
     int targetSpeed = getTargetSpeed(train);
     MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed/20);  // 適当な距離進ませる
-    timetableUpdate(train, targetSpeed, moveResult);  // 時刻表を更新する
+    timetableUpdate(train, moveResult);  // 時刻表を更新する
   }
 
   // 各ポイントについて行う

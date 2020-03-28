@@ -48,6 +48,16 @@ class Timetable {
     return null;  // すべての時刻を実施済ならnull返す
   }
 
+  // trainId のある駅の最も近い未実施時刻情報を得る
+  Info getByStationTrainId(int stationId, int trainId) {
+    for (Info info : infoList) {
+      if (info.stationId == stationId && info.trainId == trainId && info.used == false) {
+        return info;
+      }
+    }
+    return null;
+  }
+
   // ある駅のある番線を最も早く出発or通過する時刻情報を得る
   Info getDepartureByTrackId(int stationId, int trackId) {
     for (Info info : infoList) {
