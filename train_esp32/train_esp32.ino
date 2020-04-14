@@ -1,5 +1,6 @@
 #include <BluetoothSerial.h>
 BluetoothSerial SerialBT;
+//test
 
 /*調整する変数--------------------------------*/
 int input = 40;//モーターへの初期入力(0~255)
