@@ -2,6 +2,8 @@
 BluetoothSerial SerialBT;
 //test
 
+//test
+
 /*調整する変数--------------------------------*/
 int input = 40;//モーターへの初期入力(0~255)
 int input_max = 255;
