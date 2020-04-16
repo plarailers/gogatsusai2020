@@ -3,7 +3,6 @@ class State {
   ArrayList<Section> sectionList;
   ArrayList<Train> trainList;
   ArrayList<Station> stationList;
-  ESP32 esp32;
   State() {
     junctionList = new ArrayList<Junction>();
     junctionList.add(new Junction(0));
@@ -27,7 +26,6 @@ class State {
     trainList = new ArrayList<Train>();
     trainList.add(new Train(Station.getById(0).trackList.get(1), 50));  // 駅0の1番線に配置
     trainList.add(new Train(Station.getById(0).trackList.get(2), 50));  // 駅0の2番線に配置
-    esp32 = new ESP32();
   }
 }
 
