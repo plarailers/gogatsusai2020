@@ -32,7 +32,7 @@ void draw() {
   for (Train train : state.trainList) {
     int targetSpeed = getTargetSpeed(train);
     MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed/20);  // 適当な距離進ませる
-    timetableUpdate(train, targetSpeed, moveResult);  // 時刻表を更新する
+    timetableUpdate(train, moveResult);  // 時刻表を更新する
     communication.sendSpeed(train.id, targetSpeed);
   }
 
@@ -42,6 +42,13 @@ void draw() {
       Junction.getById(junction.id).toggle();  // ポイントを切り替える
       communication.sendToggle(junction.id);
     }
+  }
+
+  // センサ入力で車両の位置補正を行う
+  // センサ入力があったときに関数 positionAdjust(sensorId) を呼んでください
+  if (keyPressed == true) {  // (デバッグ用)キーを押したらセンサ0の位置補正
+    println("keyPressed");
+    positionAdjust(0);
   }
   
   // 描画
