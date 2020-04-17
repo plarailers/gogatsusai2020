@@ -10,9 +10,9 @@ void timetableUpdate(Train train, MoveResult moveResult) {
     timetable.getByTrainId(train.id).used = true;  // 到着済・通過済に変更
     
     if (info != null && info.isArrival()) {  // 到着処理
-      println("train" + train.id + ": Arrived");
+      println("[Log] train" + train.id + ": Arrived station" + info.stationId);
     } else if (info != null && info.isPassage()) {  // 通過処理
-      println("train" + train.id + ": Passed");
+      println("[Log] train" + train.id + ": Passed station" + info.stationId);
     }
   }
   // 出発処理は列車制御のところで行う
@@ -35,11 +35,11 @@ int getTargetSpeed(Train me) {
   if (me.targetSpeed == 0 && targetSpeed > 0) {  // targetSpeedがゼロから>0に変化したとき
     if (timetable.getByTrainId(me.id).isDeparture()) {  // 未出発であれば
       timetable.getByTrainId(me.id).used = true;  // 駅を出発済に変更
-      println("train" + me.id + ": Departed");
+      println("[Log] train" + me.id + ": Departed");
     }
   }
   state.trainList.get(me.id).targetSpeed = targetSpeed;
-  println("trainId="+me.id+" StopPoint=Section"+stopPoint.section.id+":"+stopPoint.mileage+" targetSpeed="+me.targetSpeed);
+  // println("trainId="+me.id+" StopPoint=Section"+stopPoint.section.id+":"+stopPoint.mileage+" targetSpeed="+me.targetSpeed);
     
   return targetSpeed;
 }
@@ -127,7 +127,7 @@ Boolean junctionControl(Junction junction) {
         Info info = timetable.getByTrainId(inTrain.id);  // 近づいてくる列車の時刻情報を取得
         Section arrTrack = Station.getById(info.stationId).trackList.get(info.trackId);  // 近づいてくる列車の着発番線を取得
         if (arrTrack.id != junction.getPointedSection().id) {  // 到着番線と、現在開通している番線が違えば、合わせる
-          println("Junction" + junction.id+":Toggled");
+          println("[Log] Junction" + junction.id+": Toggled");
           return true;
         } else {
           return false;
@@ -157,7 +157,7 @@ Boolean junctionControl(Junction junction) {
         }
         if (info != null) {  // <-このinfoは、最も早く出発or通過する列車の時刻情報
           if (junction.getInSection().id != station.trackList.get(info.trackId).id) {  // 出発番線と、現在開通している番線が異なれば、合わせる
-            println("Junction" + junction.id+":Toggled");
+            println("[Log] Junction" + junction.id+": Toggled");
             return true;
           } else {
             return false;
@@ -174,7 +174,19 @@ Boolean junctionControl(Junction junction) {
     return false;
   }
   
-}  
+}
+
+// センサから入力があったとき、列車位置を補正する。id=センサID
+void positionAdjust(int id) {
+  Sensor s = Sensor.getById(id);  // センサ取得
+  Train t = detectTrain(s.belongSection);  // センサがおかれているsectionに在線する列車を取得
+  if (t != null) {
+    println("[Log] センサ"+id+"(section="+s.belongSection.id+", position="+s.position+") を 列車"+t.id+" が通過. 列車位置補正:"+t.mileage+"->"+s.position);
+    MoveResult move = state.trainList.get(t.id).move(s.position - t.mileage);  // ずれの分だけ列車位置を補正
+  } else {
+    println("[Log] センサ"+id+"(section="+s.belongSection.id+", position="+s.position+") から入力がありましたが、当該セクションに在線なし. 位置補正失敗.");
+  }
+}
 
 // あるsectionにいる列車を返す。列車がいなければnullを返す
 Train detectTrain(Section section) {

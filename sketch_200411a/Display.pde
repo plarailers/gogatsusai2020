@@ -55,6 +55,10 @@ class Display {
         line(node6.x-10, node0.y-20, node6.x-10, node5.y+20);  //  区切り線
         line(node7.x+10, node0.y-20, node7.x+10, node5.y+20);  //  区切り線
         line(node8.x-10, node0.y-20, node8.x-10, node5.y+20);  //  区切り線
+        // センサの描画
+        fill(240);
+        strokeWeight(0);
+        rect(350-8, 200-8, 16, 16);
         // 文字類の描画
         textSize(20);
         textAlign(CENTER);

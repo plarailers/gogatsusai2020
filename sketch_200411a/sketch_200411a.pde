@@ -40,6 +40,13 @@ void draw() {
       Junction.getById(junction.id).toggle();  // ポイントを切り替える
     }
   }
+
+  // センサ入力で車両の位置補正を行う
+  // センサ入力があったときに関数 positionAdjust(sensorId) を呼んでください
+  if (keyPressed == true) {  // (デバッグ用)キーを押したらセンサ0の位置補正
+    println("keyPressed");
+    positionAdjust(0);
+  }
   
   // 描画
   display.draw(state);
