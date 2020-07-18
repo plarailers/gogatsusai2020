@@ -2297,6 +2297,14 @@ design rules under a new name.</description>
 <vertex x="77" y="44"/>
 <vertex x="77" y="73"/>
 </polygon>
+<polygon width="0.1524" layer="16">
+<vertex x="-4" y="73"/>
+<vertex x="77" y="73"/>
+<vertex x="78" y="72"/>
+<vertex x="78" y="45"/>
+<vertex x="77" y="44"/>
+<vertex x="-4" y="44"/>
+</polygon>
 </signal>
 </signals>
 <mfgpreviewcolors>
