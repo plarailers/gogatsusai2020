@@ -3420,7 +3420,7 @@ design rules under a new name.</description>
 </designrules>
 <autorouter>
 <pass name="Default">
-<param name="RoutingGrid" value="50mil"/>
+<param name="RoutingGrid" value="6mil"/>
 <param name="AutoGrid" value="1"/>
 <param name="Efforts" value="0"/>
 <param name="TopRouterVariant" value="1"/>
@@ -3440,8 +3440,8 @@ design rules under a new name.</description>
 <param name="PrefDir.13" value="0"/>
 <param name="PrefDir.14" value="0"/>
 <param name="PrefDir.15" value="0"/>
-<param name="PrefDir.16" value="a"/>
-<param name="cfVia" value="8"/>
+<param name="PrefDir.16" value="*"/>
+<param name="cfVia" value="90"/>
 <param name="cfNonPref" value="5"/>
 <param name="cfChangeDir" value="2"/>
 <param name="cfOrthStep" value="2"/>
@@ -3479,8 +3479,10 @@ design rules under a new name.</description>
 <param name="mnRipupTotal" value="100"/>
 </pass>
 <pass name="Follow-me" refer="Default" active="yes">
+<param name="cfVia" value="8"/>
 </pass>
 <pass name="Busses" refer="Default" active="yes">
+<param name="cfVia" value="8"/>
 <param name="cfNonPref" value="4"/>
 <param name="cfBusImpact" value="4"/>
 <param name="cfHugging" value="0"/>
@@ -3490,28 +3492,17 @@ design rules under a new name.</description>
 </pass>
 <pass name="Optimize1" refer="Default" active="yes">
 <param name="cfVia" value="99"/>
-<param name="cfExtdStep" value="10"/>
-<param name="cfHugging" value="1"/>
-<param name="mnExtdSteps" value="1"/>
-<param name="mnRipupLevel" value="0"/>
 </pass>
 <pass name="Optimize2" refer="Optimize1" active="yes">
-<param name="cfNonPref" value="0"/>
-<param name="cfChangeDir" value="6"/>
-<param name="cfExtdStep" value="0"/>
-<param name="cfBonusStep" value="2"/>
-<param name="cfMalusStep" value="2"/>
-<param name="cfPadImpact" value="2"/>
-<param name="cfSmdImpact" value="2"/>
-<param name="cfHugging" value="0"/>
 </pass>
 <pass name="Optimize3" refer="Optimize2" active="yes">
-<param name="cfChangeDir" value="8"/>
+<param name="cfBonusStep" value="0"/>
+<param name="cfMalusStep" value="0"/>
 <param name="cfPadImpact" value="0"/>
 <param name="cfSmdImpact" value="0"/>
+<param name="cfHugging" value="0"/>
 </pass>
 <pass name="Optimize4" refer="Optimize3" active="yes">
-<param name="cfChangeDir" value="25"/>
 </pass>
 </autorouter>
 <elements>
@@ -3549,14 +3540,14 @@ design rules under a new name.</description>
 <attribute name="POPULARITY" value="18" x="124.46" y="7.62" size="1.778" layer="27" display="off"/>
 <attribute name="VALUE" x="88.9" y="39.37" size="1.27" layer="27" ratio="10"/>
 </element>
-<element name="SV1" library="con-lsta" library_urn="urn:adsk.eagle:library:161" package="FE08" package3d_urn="urn:adsk.eagle:package:8194/1" value="" x="90.17" y="29.21" smashed="yes" rot="R180">
-<attribute name="MF" value="" x="39.37" y="95.25" size="1.778" layer="27" rot="R180" display="off"/>
-<attribute name="MPN" value="" x="39.37" y="95.25" size="1.778" layer="27" rot="R180" display="off"/>
-<attribute name="NAME" x="96.52" y="27.559" size="1.27" layer="25" ratio="10" rot="R180"/>
-<attribute name="OC_FARNELL" value="unknown" x="39.37" y="95.25" size="1.778" layer="27" rot="R180" display="off"/>
-<attribute name="OC_NEWARK" value="unknown" x="39.37" y="95.25" size="1.778" layer="27" rot="R180" display="off"/>
-<attribute name="POPULARITY" value="10" x="39.37" y="95.25" size="1.778" layer="27" rot="R180" display="off"/>
-<attribute name="VALUE" x="100.33" y="32.131" size="1.27" layer="27" ratio="10" rot="R180"/>
+<element name="SV1" library="con-lsta" library_urn="urn:adsk.eagle:library:161" package="FE08" package3d_urn="urn:adsk.eagle:package:8194/1" value="" x="102.87" y="29.21" smashed="yes">
+<attribute name="MF" value="" x="153.67" y="-36.83" size="1.778" layer="27" display="off"/>
+<attribute name="MPN" value="" x="153.67" y="-36.83" size="1.778" layer="27" display="off"/>
+<attribute name="NAME" x="96.52" y="30.861" size="1.27" layer="25" ratio="10"/>
+<attribute name="OC_FARNELL" value="unknown" x="153.67" y="-36.83" size="1.778" layer="27" display="off"/>
+<attribute name="OC_NEWARK" value="unknown" x="153.67" y="-36.83" size="1.778" layer="27" display="off"/>
+<attribute name="POPULARITY" value="10" x="153.67" y="-36.83" size="1.778" layer="27" display="off"/>
+<attribute name="VALUE" x="92.71" y="26.289" size="1.27" layer="27" ratio="10"/>
 </element>
 <element name="SV2" library="con-lsta" library_urn="urn:adsk.eagle:library:161" package="FE10" package3d_urn="urn:adsk.eagle:package:8192/1" value="" x="95.25" y="83.82" smashed="yes">
 <attribute name="MF" value="" x="121.92" y="17.78" size="1.778" layer="27" display="off"/>
@@ -3596,13 +3587,13 @@ design rules under a new name.</description>
 <attribute name="NAME" x="71.374" y="43.688" size="1.27" layer="25" ratio="10" rot="R270"/>
 <attribute name="VALUE" x="69.215" y="42.9006" size="1.27" layer="27" ratio="10" rot="R270"/>
 </element>
-<element name="R8" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0207/10" package3d_urn="urn:adsk.eagle:package:25939/1" value="" x="74.93" y="40.64" smashed="yes" rot="R270">
-<attribute name="NAME" x="76.454" y="43.688" size="1.27" layer="25" ratio="10" rot="R270"/>
-<attribute name="VALUE" x="74.295" y="42.9006" size="1.27" layer="27" ratio="10" rot="R270"/>
+<element name="R8" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0207/10" package3d_urn="urn:adsk.eagle:package:25939/1" value="" x="78.74" y="40.64" smashed="yes" rot="R270">
+<attribute name="NAME" x="80.264" y="43.688" size="1.27" layer="25" ratio="10" rot="R270"/>
+<attribute name="VALUE" x="78.105" y="42.9006" size="1.27" layer="27" ratio="10" rot="R270"/>
 </element>
-<element name="R9" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0207/10" package3d_urn="urn:adsk.eagle:package:25939/1" value="" x="78.74" y="40.64" smashed="yes" rot="R90">
-<attribute name="NAME" x="77.216" y="37.592" size="1.27" layer="25" ratio="10" rot="R90"/>
-<attribute name="VALUE" x="79.375" y="38.3794" size="1.27" layer="27" ratio="10" rot="R90"/>
+<element name="R9" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0207/10" package3d_urn="urn:adsk.eagle:package:25939/1" value="" x="74.93" y="40.64" smashed="yes" rot="R90">
+<attribute name="NAME" x="73.406" y="37.592" size="1.27" layer="25" ratio="10" rot="R90"/>
+<attribute name="VALUE" x="75.565" y="38.3794" size="1.27" layer="27" ratio="10" rot="R90"/>
 </element>
 <element name="D3" library="diode" library_urn="urn:adsk.eagle:library:210" package="D-10" package3d_urn="urn:adsk.eagle:package:43434/1" value="" x="113.03" y="38.1" smashed="yes" rot="R180">
 <attribute name="NAME" x="116.205" y="36.195" size="1.27" layer="25" ratio="10" rot="R180"/>
@@ -3619,7 +3610,7 @@ design rules under a new name.</description>
 <signal name="N$1">
 <contactref element="SV1" pad="7"/>
 <contactref element="R6" pad="1"/>
-<wire x1="66.04" y1="35.56" x2="83.82" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="66.04" y1="35.56" x2="109.22" y2="29.21" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$3">
 <contactref element="SV1" pad="8"/>
@@ -3627,7 +3618,7 @@ design rules under a new name.</description>
 <contactref element="IC2" pad="IN"/>
 <contactref element="C1" pad="1"/>
 <contactref element="C2" pad="1"/>
-<wire x1="91.44" y1="38.1" x2="81.28" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="91.44" y1="38.1" x2="111.76" y2="29.21" width="0" layer="19" extent="1-1"/>
 <wire x1="91.44" y1="44.45" x2="91.44" y2="38.1" width="0" layer="19" extent="1-1"/>
 <wire x1="83.82" y1="39.37" x2="91.44" y2="38.1" width="0" layer="19" extent="1-1"/>
 <wire x1="83.82" y1="46.99" x2="83.82" y2="39.37" width="0" layer="19" extent="1-1"/>
@@ -3635,7 +3626,7 @@ design rules under a new name.</description>
 <signal name="N$5">
 <contactref element="SV1" pad="6"/>
 <contactref element="R9" pad="1"/>
-<wire x1="78.74" y1="35.56" x2="86.36" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="74.93" y1="35.56" x2="106.68" y2="29.21" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$6">
 <contactref element="SV3" pad="14"/>
@@ -3667,14 +3658,14 @@ design rules under a new name.</description>
 <wire x1="87.4776" y1="76.0349" x2="86.36" y2="83.82" width="0" layer="19" extent="1-1"/>
 <wire x1="83.82" y1="44.45" x2="87.4776" y2="76.0349" width="0" layer="19" extent="1-1"/>
 <wire x1="83.82" y1="36.83" x2="83.82" y2="44.45" width="0" layer="19" extent="1-1"/>
-<wire x1="74.93" y1="35.56" x2="83.82" y2="36.83" width="0" layer="19" extent="1-1"/>
-<wire x1="69.85" y1="35.56" x2="74.93" y2="35.56" width="0" layer="19" extent="1-1"/>
+<wire x1="78.74" y1="35.56" x2="83.82" y2="36.83" width="0" layer="19" extent="1-1"/>
+<wire x1="69.85" y1="35.56" x2="78.74" y2="35.56" width="0" layer="19" extent="1-1"/>
 <wire x1="93.98" y1="44.45" x2="83.82" y2="44.45" width="0" layer="19" extent="1-1"/>
 <wire x1="93.98" y1="38.1" x2="93.98" y2="44.45" width="0" layer="19" extent="1-1"/>
-<wire x1="99.06" y1="29.21" x2="93.98" y2="38.1" width="0" layer="19" extent="1-1"/>
-<wire x1="96.52" y1="29.21" x2="99.06" y2="29.21" width="0" layer="19" extent="1-1"/>
-<wire x1="93.98" y1="29.21" x2="96.52" y2="29.21" width="0" layer="19" extent="1-1"/>
-<wire x1="102.87" y1="36.83" x2="93.98" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="93.98" y1="29.21" x2="93.98" y2="38.1" width="0" layer="19" extent="1-1"/>
+<wire x1="96.52" y1="29.21" x2="93.98" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="99.06" y1="29.21" x2="96.52" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="102.87" y1="36.83" x2="99.06" y2="29.21" width="0" layer="19" extent="1-1"/>
 <wire x1="102.87" y1="43.18" x2="102.87" y2="36.83" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$4">
