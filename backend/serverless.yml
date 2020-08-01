@@ -1,0 +1,79 @@
+service:
+  name: gogatsusai2020-backend
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - execute-api:ManageConnections
+      Resource:
+        - arn:aws:execute-api:*:*:**/@connections/*
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - Fn::GetAtt: [ ChatConnectionsTable, Arn ]
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    DYNAMODB_CONNECTIONS:
+      Ref: ChatConnectionsTable
+  websocketsApiName: ${self:service.name}-${self:provider.stage}
+  websocketsApiRouteSelectionExpression: $request.body.action
+
+functions:
+  hello:
+    handler: src/handler.hello
+  connect:
+    handler: src/handler.connect
+    events:
+      - websocket:
+          route: $connect
+  disconnect:
+    handler: src/handler.disconnect
+    events:
+      - websocket:
+          route: $disconnect
+  defaultMessage:
+    handler: src/handler.defaultMessage
+    events:
+      - websocket:
+          route: $default
+
+resources:
+  Resources:
+    ChatConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service.name}-connections-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: ConnectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ConnectionId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        SSESpecification:
+          SSEEnabled: True
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
