@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>オンライン運転体験 | 東大プラレーラーズ五月祭2020</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <header>
+      <h1>オンライン運転体験</h1>
+    </header>
+    <div id="message_area">
+      <p id="speed_digit">Speed:0</p>
+    </div>
+    <div id="content">
+      <div id="controller">
+        <div id="movie"></div>
+        <div id="mascon_area">
+          <input type="range" id="speed" value="0" min="0" max="255" step="1">
+        </div>
+      </div>
+    </div>
+    
+    
+  </body>
+</html>
+
+<script>
+  // スピードを変化させたときに実行する処理
+  document.getElementById('speed').oninput = function() {
+    var speed = document.getElementById('speed').value;  // 現在の速度を取得
+    document.getElementById('speed_digit').textContent = 'Speed:' + speed;  // スピード表示部に現在速度を反映
+  }
+
+  // ロード時にレイアウトを調整
+  window.onload = controller_resize;
+  // ウィンドウサイズに応じてレイアウトを調整
+  var resizeTimer;
+  window.addEventListener('resize', function(event){
+    if (!resizeTimer) {
+      clearTimeout(resizeTimer);
+    }
+    resizeTimer = setTimeout(function(){controller_resize();}, 300);
+  });
+
+  function controller_resize() {
+    // div content のサイズ調整
+    // windowのheight - headerのheight - message_areaのheight
+    document.getElementById('content').style.height = window.innerHeight - document.getElementsByTagName('header')[0].clientHeight - document.getElementById('message_area').clientHeight + 'px';
+    console.log(document.getElementsByTagName('header'));
+    console.log(document.getElementById('message_area'));
+    // div controller のサイズ調整
+    var content_width = document.getElementById('content').clientWidth;
+    var content_height = document.getElementById('content').clientHeight;
+    var controller = document.getElementById('controller')
+    if ( content_width / content_height > 64/27 ) {  // controllerより横長の表示領域
+      controller.style.height = '100%';
+      controller.style.width = content_height * 64/27 + 'px';
+    } else {  // 縦長表示領域
+      controller.style.width = '100%';
+      controller.style.height = content_width * 27/64 + 'px';
+    }
+    // マスコンハンドルのサイズ変更
+    var area_width  = document.getElementById('mascon_area').clientWidth;
+    var area_height = document.getElementById('mascon_area').clientHeight;
+    var mascon = document.getElementById('speed');
+    mascon.style.width = area_height * 0.667 + 'px';  // 長さ
+    mascon.style.marginTop = area_height * 0.5 - 5 + 'px';  // 縦位置を調整
+    mascon.style.marginLeft = - (mascon.clientWidth - area_width) / 2 + 'px';  // 横位置ははみ出している分左へ
+  }
+</script>
