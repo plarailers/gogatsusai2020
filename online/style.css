@@ -30,13 +30,12 @@ header{
   margin: 0;
 }
 
-#message_area{
+#input_area{
   display: block;
   box-sizing: border-box;
   width: 100%;
-  height: 80px;
-  padding: 12px;
-  margin: 0;
+  height: 63px;  /*<- 51+6+6*/
+  padding: 6px 12px;
 }
 .input_text {
   display: block;
@@ -96,12 +95,43 @@ header{
   -webkit-transform: translateY(4px);
   transform: translateY(4px);
   border-bottom: none;
+  margin-bottom: 8px;
 }
+
+#message_area{
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0px 12px;
+}
+p#message {
+  display: inline-block;
+  padding-left: 2px;
+  font-size: 15px;
+}
+#message_icon {
+	top: 0;
+	left: 0;
+	padding: 0px 8px;
+  color: #888;
+}
+.loader {
+  display: inline-block;
+  padding: 0px 8px;
+  visibility: hidden;
+}
+.ball-pulse>div {
+  width: 4px;
+  height: 4px;
+  background-color: #888;
+  margin: 0px -1px;
+}
+
 
 #content{
   box-sizing: border-box;
   width: 100%;
-  height: calc(100% - 130px);
+  height: calc(100% - 150px);
   padding: 12px;
 }
 #controller{
@@ -149,6 +179,7 @@ iframe{
   margin-top: 0;
   margin-left: 0;
   transform: rotate(-90deg);
+  pointer-events: none;  /* 操作不可 */
 }
 #speed:focus{
   outline: none;
