@@ -5,13 +5,19 @@
     <title>オンライン運転体験 | 東大プラレーラーズ五月祭2020</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
   </head>
   <body>
     <header>
       <h1>オンライン運転体験</h1>
     </header>
     <div id="message_area">
-      <p id="speed_digit">Speed:0</p>
+      <!-- https://copypet.jp/692/ より -->
+      <div class="input_text">
+        <input type="text" id="pw_input" placeholder="パスワードを入力">
+        <i class="fas fa-subway"　aria-hidden="true"></i>
+      </div>
+      <a href="#" class="input_button" id="pw_send">運転をはじめる</a>
     </div>
     <div id="content">
       <div id="controller">
@@ -27,29 +33,31 @@
 </html>
 
 <script>
-  // スピードを変化させたときに実行する処理
-  document.getElementById('speed').oninput = function() {
-    var speed = document.getElementById('speed').value;  // 現在の速度を取得
-    document.getElementById('speed_digit').textContent = 'Speed:' + speed;  // スピード表示部に現在速度を反映
-  }
+  // var ws = new WebSocket('wss://yt8z40ew59.execute-api.us-east-1.amazonaws.com/dev');  // サーバ通信用のwebsocket
+  var speed = 0;
 
-  // ロード時にレイアウトを調整
-  window.onload = controller_resize;
-  // ウィンドウサイズに応じてレイアウトを調整
-  var resizeTimer;
-  window.addEventListener('resize', function(event){
-    if (!resizeTimer) {
-      clearTimeout(resizeTimer);
+  // 【スピードをサーバに送信】0.4secおきに送信する
+  var timer;
+  var isTimerOn = false;
+  document.getElementById('speed').addEventListener('input', function(){
+    if (isTimerOn == false) {
+      timer = setTimeout(function(){
+        speed = document.getElementById('speed').value;
+        // ws.send(JSON.stringify({"speed": speed}));
+        console.log('send speed ' + speed);
+        isTimerOn = false;
+      }, 400);  // ハンドルを動かした0.4sec後に送信
+      isTimerOn = true;
     }
-    resizeTimer = setTimeout(function(){controller_resize();}, 300);
   });
 
+  //【PW照合関係】
+  
+
+  //【サイズ調整】
+  window.onload = controller_resize;  // ロード時にレイアウトを調整
+  window.onresize = controller_resize; // ウィンドウサイズ変更時にレイアウトを調整
   function controller_resize() {
-    // div content のサイズ調整
-    // windowのheight - headerのheight - message_areaのheight
-    document.getElementById('content').style.height = window.innerHeight - document.getElementsByTagName('header')[0].clientHeight - document.getElementById('message_area').clientHeight + 'px';
-    console.log(document.getElementsByTagName('header'));
-    console.log(document.getElementById('message_area'));
     // div controller のサイズ調整
     var content_width = document.getElementById('content').clientWidth;
     var content_height = document.getElementById('content').clientHeight;
@@ -57,11 +65,11 @@
     if ( content_width / content_height > 64/27 ) {  // controllerより横長の表示領域
       controller.style.height = '100%';
       controller.style.width = content_height * 64/27 + 'px';
-    } else {  // 縦長表示領域
+    } else {  // controllerより縦長の表示領域
       controller.style.width = '100%';
       controller.style.height = content_width * 27/64 + 'px';
     }
-    // マスコンハンドルのサイズ変更
+    // マスコンハンドルのサイズ調整
     var area_width  = document.getElementById('mascon_area').clientWidth;
     var area_height = document.getElementById('mascon_area').clientHeight;
     var mascon = document.getElementById('speed');
