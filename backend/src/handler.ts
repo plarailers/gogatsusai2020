@@ -39,6 +39,39 @@ export const disconnect: APIGatewayProxyHandler = async (event: APIGatewayProxyE
 
 export const defaultMessage: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.debug('Starting Lambda handler: event=%s', JSON.stringify(event));
+  try {
+    const parsed = JSON.parse(event.body);
+    const password = parsed.password;
+    if (password === undefined) {
+      throw new Error('パスワードが必要です。');
+    }
+    const result = await dynamodb.get({ TableName: process.env.DYNAMODB_PASSWORDS, Key: { Password: password } }).promise();
+    if (result.Item) {
+      const { Item } = result;
+      const startTime = new Date(Item.StartTime).getTime();
+      const endTime = new Date(Item.EndTime).getTime();
+      const now = Date.now();
+      if (now < startTime) {
+        throw new Error('パスワードの有効期限が始まっていません。');
+      } else if (endTime < now) {
+        throw new Error('パスワードの有効期限が切れています。');
+      }
+    } else {
+      throw new Error('パスワードが存在しません。');
+    }
+  } catch (e) {
+    const api = new ApiGatewayManagementApi({ endpoint: `${event.requestContext.domainName}/${event.requestContext.stage}` });
+    await api.postToConnection({
+      ConnectionId: event.requestContext.connectionId,
+      Data: JSON.stringify({
+        message: `${e}`,
+      }),
+    }).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify({}),
+    };
+  }
   const connections = await dynamodb.scan({ TableName: process.env.DYNAMODB_CONNECTIONS, ProjectionExpression: 'ConnectionId' }).promise();
   await Promise.all(connections.Items.map(async ({ ConnectionId }) => {
     try {
