@@ -26,6 +26,6 @@ void draw() {
 
 void webSocketEvent(String msg){
  println(msg);
- tmp_speed = int(msg);
+ int tmp_speed = int(msg);
  myPort.write(tmp_speed);
 }
