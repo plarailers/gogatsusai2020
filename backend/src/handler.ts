@@ -65,40 +65,64 @@ async function checkPassword(body: string) {
   try {
     parsed = JSON.parse(body);
   } catch (e) {
-    return ERROR.INVALID_JSON;
+    return {
+      error: ERROR.INVALID_JSON,
+    };
   }
   if (typeof parsed !== "object") {
-    return ERROR.INVALID_JSON;
+    return {
+      error: ERROR.INVALID_JSON,
+    };
   }
   const password = parsed.password;
   if (!password) {
-    return ERROR.PASSWORD_NOT_SET;
+    return {
+      error: ERROR.PASSWORD_NOT_SET,
+    };
   }
   const { Item } = await dynamodb.get({ TableName: process.env.DYNAMODB_PASSWORDS, Key: { Password: password } }).promise();
   if (!Item) {
-    return ERROR.PASSWORD_NOT_EXIST;
+    return {
+      error: ERROR.PASSWORD_NOT_EXIST,
+    };
   }
   const startTime = new Date(Item.StartTime).getTime();
   const endTime = new Date(Item.EndTime).getTime();
   const now = Date.now();
   if (now < startTime) {
-    return ERROR.PASSWORD_NOT_YET_VALID;
+    return {
+      error: ERROR.PASSWORD_NOT_YET_VALID,
+      startTime: Item.StartTime,
+      endTime: Item.EndTime,
+    };
   } else if (endTime < now) {
-    return ERROR.PASSWORD_EXPIRED;
+    return {
+      error: ERROR.PASSWORD_EXPIRED,
+      startTime: Item.StartTime,
+      endTime: Item.EndTime,
+    };
   }
-  return null;
+  return {
+    parsed,
+    startTime: Item.StartTime,
+    endTime: Item.EndTime,
+  };
 }
 
 export const defaultMessage: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.debug('Starting Lambda handler: event=%s', JSON.stringify(event));
-  const passwordError = await checkPassword(event.body);
-  if (passwordError) {
+  const checkResult = await checkPassword(event.body);
+  if (checkResult.error) {
+    const { startTime, endTime } = checkResult;
+    const { code, message } = checkResult.error;
     const api = new ApiGatewayManagementApi({ endpoint: `${event.requestContext.domainName}/${event.requestContext.stage}` });
     await api.postToConnection({
       ConnectionId: event.requestContext.connectionId,
       Data: JSON.stringify({
-        code: passwordError.code,
-        message: passwordError.message,
+        code,
+        message,
+        startTime,
+        endTime,
       }),
     }).promise();
     return {
@@ -106,7 +130,7 @@ export const defaultMessage: APIGatewayProxyHandler = async (event: APIGatewayPr
       body: JSON.stringify({}),
     };
   }
-  const parsed = JSON.parse(event.body);
+  const { parsed, startTime, endTime } = checkResult;
   const connections = await dynamodb.scan({ TableName: process.env.DYNAMODB_CONNECTIONS, ProjectionExpression: 'ConnectionId' }).promise();
   await Promise.all(connections.Items.map(async ({ ConnectionId }) => {
     try {
@@ -114,6 +138,8 @@ export const defaultMessage: APIGatewayProxyHandler = async (event: APIGatewayPr
         ConnectionId: ConnectionId,
         Data: JSON.stringify({
           code: 0,
+          startTime,
+          endTime,
           ...parsed,
         }),
       };
