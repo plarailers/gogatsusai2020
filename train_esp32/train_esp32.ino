@@ -1,11 +1,8 @@
 #include <BluetoothSerial.h>
 BluetoothSerial SerialBT;
-//test
-
-//test
 
 /*調整する変数--------------------------------*/
-int input = 40;//モーターへの初期入力(0~255)
+int input = 80;//モーターへの初期入力(0~255)
 int input_max = 255;
 int input_min = 25;
 double speed_id = 50;//車両の速度初期目標値(cm/s)
@@ -17,10 +14,11 @@ double ki = 0.01;//積分係数
 /*------------------------------------------*/
 
 char v;
-const int SENSOR_PIN = A10;//ホールセンサーのピンGPIO34
-const int INPUT_PIN = A17;//モーターのピンGPIO12
+const int SENSOR_PIN = 4;//ホールセンサーのピン
+const int INPUT_PIN = A18;//モーターのピン
 double speed;//車両の速度
-int value;//ホールセンサーの値
+int value = 0;//ホールセンサーの値
+int value2 =0;
 bool hole = 0;//ホールセンサーの値valueを0or1に変換
 bool status = 0;//車両の状態。1:進行、0:停止
 unsigned int new_time = 0;
@@ -35,10 +33,10 @@ double e2;//2つ前の偏差
 //進行中に繰り返す
 void move(double *speed_id) {
   ledcWrite(0, input);
-  value = analogRead(SENSOR_PIN);
+  value = digitalRead(SENSOR_PIN);
 
   //磁石がホールセンサーの上にきたら
-  if (hole == 0 && value >= 2048) {
+  if (hole == 0 && value == 1/*>= 2048*/) {
     hole = 1;
     period = new_time - old_time;
     old_time = new_time;
@@ -60,7 +58,7 @@ void move(double *speed_id) {
       input = input_min;
     }
   }
-  else if (hole == 1 && value < 2048) {
+  else if (hole == 1 && value==0/* < 2048*/) {
     hole = 0;
   }
 
@@ -99,24 +97,61 @@ void setup() {
   SerialBT.begin("ESP32");
   ledcSetup(0, 12800, 8);
   ledcAttachPin(INPUT_PIN, 0);
-  SerialBT.println("Start!");
+  //SerialBT.println("Start!");
+  Serial.begin(9600);//観測用
+  pinMode(4, INPUT);
+  delay(10000);
 }
 
 void loop(){
+
+  //delay(10);
+
+  value2 = digitalRead(SENSOR_PIN);
+
+  Serial.print(status);
+  Serial.print(" ");
+  Serial.print(value2);
+  Serial.print(" ");
+  Serial.print(speed_id);
+  Serial.print(" ");
+  Serial.println(input);
   
   new_time = millis();
+  //SerialBT.write('a');//通信テスト用
 
-  if (SerialBT.available()>0) {
+  /*if (SerialBT.available()>0) {
     v = SerialBT.read();
+    Serial.println(v);
     switch(v) {
       case 'a':
         status = 1;
+        break;
       case 'b':
         status = 0;
+        break;
       case 'c':
         accel(&speed_id);
+        break;
       case 'd':
         brake(&speed_id);
+        break;
+    }
+  }*/
+
+  if (SerialBT.available()>0) {
+    v = SerialBT.read();
+    if (v == 'a') {
+      status = 1;
+    }
+    else if (v == 'b') {
+      status = 0;
+    }
+    else if (v == 'c') {
+      accel(&speed_id);
+    }
+    else if (v == 'd') {
+      brake(&speed_id);
     }
   }
 

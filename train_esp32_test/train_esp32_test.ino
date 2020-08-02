@@ -2,7 +2,7 @@
 BluetoothSerial SerialBT;
 
 /*調整する変数--------------------------------*/
-int input = 80;//モーターへの初期入力(0~255)
+int input = 40;//モーターへの初期入力(0~255)
 int input_max = 255;
 int input_min = 25;
 double speed_id = 50;//車両の速度目標値(cm/s)
@@ -14,10 +14,10 @@ double ki = 0.01;//積分係数
 /*------------------------------------------*/
 
 char v;
-const int SENSOR_PIN = A0;//ホールセンサーのピンGPIO34
-const int INPUT_PIN = A17;//モーターのピンGPIO12
+const int SENSOR_PIN = 4;//ホールセンサーのピンGPIO4
+const int INPUT_PIN = A18;//モーターのピンGPIO25
 double speed;//車両の速度
-int value;//ホールセンサーの値
+int value = 0;//ホールセンサーの値
 bool hole = 0;//ホールセンサーの値valueを0or1に変換
 bool status = 0;//車両の状態。1:進行、0:停止
 unsigned int new_time = 0;
@@ -34,13 +34,15 @@ void move(double *speed_id) {
   ledcWrite(0, input);
   value = analogRead(SENSOR_PIN);
 
+  
+
   //磁石がホールセンサーの上にきたら
   if (hole == 0 && value >= 2048) {
     hole = 1;
     period = new_time - old_time;
     old_time = new_time;
     //PCに1回転ごとに信号を送る
-    SerialBT.println('c');
+    SerialBT.println('o');
 
     //周期periodを速度speedに変換
     speed = 2000*3.1415926535*r/(double)period;
@@ -61,11 +63,7 @@ void move(double *speed_id) {
     hole = 0;
   }
 
-  Serial.print(hole);
-  Serial.print(" ");
-  Serial.print(speed);
-  Serial.print(" ");
-  Serial.println(input);
+  
   
 }
 
@@ -90,15 +88,26 @@ void brake(double *speed_id) {
 
 /*---------------------------------------------*/
 void setup() {
-  SerialBT.begin("ESP32");
+  //SerialBT.begin("ESP32");
   ledcSetup(0, 12800, 8);
   ledcAttachPin(INPUT_PIN, 0);
-  SerialBT.println("Start!");
-  Serial.begin(9600);
+  //SerialBT.println("Start!");
+  Serial.begin(115200);
+  pinMode(4, INPUT);
 }
 
 void loop(){
-  
+
+  Serial.print(value);
+  Serial.print(" ");
+  Serial.print(hole);
+  Serial.print(" ");
+  Serial.print(status);
+  Serial.print(" ");
+  Serial.print(speed);
+  Serial.print(" ");
+  Serial.println(input);
+
   new_time = millis();
 
   if (Serial.available()>0) {
