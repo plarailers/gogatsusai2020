@@ -1,5 +1,5 @@
 #https://qiita.com/umi_mori/items/757834e0ef75f38cea19
-#から
+#pythonによるシリアル通信(読み書き)ができるはず
 import serial
 
 print("===== Start Program =====\n")
