@@ -26,12 +26,12 @@ void draw() {
 }
 
 void webSocketEvent(String msg){
- println(msg);
+ //println(msg);
  JSONArray jsonArray_msg = parseJSONArray(msg);
  JSONObject json_msg = jsonArray_msg.getJSONObject(0);
  if (!json_msg.isNull("speed")) {
   int tmp_speed = int(json_msg.getInt("speed"));
-  println(tmp_speed);
+  //println(tmp_speed);
   myPort.write(tmp_speed);
  }
 }
