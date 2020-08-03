@@ -85,6 +85,12 @@ void stop() {
   ledcWrite(0,0);
 }
 
+void start() {// 発車
+  ledcWrite(0,240);
+  delay(1000);
+}
+
+
 //加速
 void accel(double *speed_id) {
   *speed_id += 5;//速度目標値を5上げる
@@ -130,6 +136,7 @@ void loop(){
     v = SerialBT.read();
     if (v == 'a') {//'a'を受け取ったらstatusを1にする。
       status = 1;
+      start();
     }
     else if (v == 'b') {//'b'を受け取ったらstatusを0にする。
       status = 0;

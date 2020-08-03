@@ -34,6 +34,16 @@ void move(double *speed_id) {
   ledcWrite(0, input);
   value = analogRead(SENSOR_PIN);
 
+  Serial.print(value);
+  Serial.print(" ");
+  Serial.print(hole);
+  Serial.print(" ");
+  Serial.print(status);
+  Serial.print(" ");
+  Serial.print(speed);
+  Serial.print(" ");
+  Serial.println(input);
+
   
 
   //磁石がホールセンサーの上にきたら
@@ -72,6 +82,11 @@ void stop() {
   ledcWrite(0,0);
 }
 
+void start() {
+  ledcWrite(0,240);
+  delay(1000);
+}
+
 void accel(double *speed_id) {
   *speed_id += 5;
   if (*speed_id >= speed_max) {
@@ -98,7 +113,7 @@ void setup() {
 
 void loop(){
 
-  Serial.print(value);
+  /*Serial.print(value);
   Serial.print(" ");
   Serial.print(hole);
   Serial.print(" ");
@@ -106,13 +121,14 @@ void loop(){
   Serial.print(" ");
   Serial.print(speed);
   Serial.print(" ");
-  Serial.println(input);
+  Serial.println(input);*/
 
   new_time = millis();
 
   if (Serial.available()>0) {
     v = Serial.read();
     if (v == 'a') {
+      start();
       status = 1;
     }
     else if (v == 'b') {
