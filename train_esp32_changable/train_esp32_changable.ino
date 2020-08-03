@@ -134,6 +134,7 @@ void loop(){
 
   if (SerialBT.available()>0) {
     v = SerialBT.read();
+    SerialBT.write(v);  //デバッグ用（来たやつ返す）
     if (v == 0) { //送られてきた速度が0なら止める。
       stop();
       status = 0;
