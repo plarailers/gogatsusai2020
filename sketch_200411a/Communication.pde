@@ -3,6 +3,7 @@ import java.util.Queue;
 import java.util.ArrayDeque;
 import java.util.Map;
 
+// ESP32 や Arduino との通信をまとめる。
 // シミュレーションモードを使うと接続が無くてもある程度動作確認できる。
 class Communication {
   boolean simulationMode;
@@ -34,7 +35,7 @@ class Communication {
   
   void updateSimulation() {
     if (simulationMode) {
-      for(Map.Entry<Integer, Integer> entry : simulationSpeedMap.entrySet()) {
+      for (Map.Entry<Integer, Integer> entry : simulationSpeedMap.entrySet()) {
         int trainId = entry.getKey();
         int speed = entry.getValue();
         if (speed > 0) {
@@ -71,7 +72,7 @@ class Communication {
     }
   }
   
-  // 指定した trainId に目標速度を送る。
+  // 指定した車両に目標速度を送る。
   void sendSpeed(int trainId, int speed) {
     if (simulationMode) {
       simulationSpeedMap.put(trainId, speed);
@@ -80,7 +81,7 @@ class Communication {
     }
   }
   
-  // 指定した junctionId に切替命令を送る。
+  // 指定したポイントに切替命令を送る。
   void sendToggle(int junctionId) {
     if (simulationMode) {
     } else {
