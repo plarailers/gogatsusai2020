@@ -13,9 +13,9 @@ void setup() {
   timetable = new Timetable();
   display = new Display();
   display.setup();
-  communication = new Communication();
-  communication.isSimulated = true;
-  communication.updateSimulation();
+  communication = new Communication(this);
+  communication.simulationMode = true;
+  communication.setup();
   while (communication.available() > 0) {  // 各列車について行う
     int id = communication.read();  // 列車id取得
     state.trainList.get(id).id = id;  // 当該列車を取得
