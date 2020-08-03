@@ -19,7 +19,7 @@ double kd = 1;//微分係数
 double ki = 0.01;//積分係数
 /*------------------------------------------*/
 
-double v;
+double v; //charからdoubleに変更したの注意。
 const int SENSOR_PIN = 4;//ホールセンサーのピン
 const int INPUT_PIN = A18;//モーターのピン
 double speed;//車両の速度
@@ -128,23 +128,23 @@ void loop(){
   Serial.print(speed_id);
   Serial.print(" ");
   Serial.println(input);
-  
+
   new_time = millis();
   //SerialBT.write('a');//通信テスト用
 
   if (SerialBT.available()>0) {
     v = SerialBT.read();
-    if (v == 0) {
+    if (v == 0) { //送られてきた速度が0なら止める。
       stop();
       status = 0;
     }
-    else if (status == 0) {
+    else if (status == 0) { //現在停車中ならstartさせてからmove(v)する
       start();
       status = 1;
-      move(v);
+      move(&v);
     }
-    else {
-      move(v);
+    else { //それ以外はmove(v)
+      move(&v);
     }
   }
 }
