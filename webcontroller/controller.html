@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>オンライン運転体験 | 東大プラレーラーズ五月祭2020</title>
+    <link href="loaders.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+    
+  </head>
+  <body>
+    <header>
+      <h1>オンライン運転体験</h1>
+    </header>
+    <div id="input_area">
+      <!-- https://copypet.jp/692/ より -->
+      <div class="input_text">
+        <input type="text" id="pw_input" placeholder="パスワードを入力">
+        <i class="fas fa-subway"></i>
+      </div>
+      <a href="#" class="input_button" id="pw_send">運転をはじめる</a>
+    </div>
+    <div id="message_area">
+      <i id="message_icon" class="fas fa-info-circle"></i>
+      <p id="message">指定された時間になったら、パスワードを入力し「運転をはじめる」を押してください。</p>
+      <!-- https://github.com/ConnorAtherton/loaders.css より -->
+      <div class="loader" id="loader">  
+        <div class="loader-inner ball-pulse">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+    <div id="content">
+      <div id="controller">
+        <div id="movie"></div>
+        <div id="mascon_area">
+          <input type="range" id="speed" value="0" min="0" max="255" step="1">
+        </div>
+      </div>
+    </div>
+    
+    
+  </body>
+</html>
+
+<script>
+  var ws = new WebSocket('wss://60jt3xl73m.execute-api.ap-northeast-1.amazonaws.com/dev');  // サーバ通信用のwebsocket
+  var speed = 0;
+  var pw = '';
+
+  // 【スピードをサーバに送信】0.4secおきに送信する
+  var timer;
+  var isTimerOn = false;
+  document.getElementById('speed').addEventListener('input', function(){
+    if (isTimerOn == false) {
+      timer = setTimeout(function(){
+        speed = Number(document.getElementById('speed').value);
+        ws.send(JSON.stringify({"password": pw, "speed": speed}));
+        console.log(speed);
+        isTimerOn = false;
+      }, 400);  // ハンドルを動かした0.4sec後に送信
+      isTimerOn = true;
+    }
+  });
+
+  //【PW照合関係】
+  var icon = document.getElementById('message_icon');
+  var loader = document.getElementById('loader');
+  var sendTimer;
+  document.getElementById('pw_send').onclick = function() {
+    pw = document.getElementById('pw_input').value;
+    if (!pw) {  // pw空欄の場合はメッセージ表示
+      message.innerText = 'パスワード欄が空欄です。入力してください。';
+    } else {
+      ws.send(JSON.stringify({"password": pw}));  // pw送信
+      console.log('{"password": '+pw+'}');
+      message.innerText = 'パスワードを確認中です。少々お待ちください。';
+      loader.style.visibility = 'visible';
+      sendTimer = setTimeout(function(){  // 10秒経っても応答ナシなら諦める
+        message.innerText = '五月祭会場と通信できませんでした。ネットワーク接続を確認し、もう一度お試しください。';
+        loader.style.visibility = 'hidden';
+      }, 10000);
+    }
+  }
+
+  // サーバからの返答受信
+  try {
+    ws.addEventListener('message', function(event) {
+      var response = JSON.parse(event.data);  // pw照合結果受信
+      clearTimeout(sendTimer);  // タイムアウト解除
+      loader.style.visibility = 'hidden';
+      console.log(event.data);
+
+      switch (response.code) {
+        case 0:  // パスワード正解
+          var startTime = new Date(response.startTime);
+          var endTime = new Date(response.endTime);
+          document.getElementById('speed').style.pointerEvents = 'all';  // ハンドルの操作を許可
+          message.innerText = 'パスワードを確認しました！　' + endTime.getHours() + '時' + endTime.getMinutes() + '分 まで自由に運転できます。';
+          break;
+        case 1:
+          message.innerText = 'システムエラーが発生しました。xxまでご連絡ください。エラーコード:1';
+          break;
+        case 2:
+          message.innerText = 'システムエラーが発生しました。xxまでご連絡ください。エラーコード:2';
+          break;
+        case 3:
+          message.innerText = '入力されたパスワードが存在しません。誤りがないかもう一度お確かめください。';
+          break;
+        case 4:
+          message.innerText = '有効期限が始まっていないようです。もうしばらくお待ちください。';
+          break;
+        case 5:
+          message.innerText = 'パスワードの有効期限が切れているため、運転できません。';
+          break;
+        default:
+          message.innerText = '不明なエラーが発生しました。お手数ですがもう一度お試しください。';
+          break;
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  
+
+  //【サイズ調整】
+  window.onload = controller_resize;  // ロード時にレイアウトを調整
+  window.onresize = controller_resize; // ウィンドウサイズ変更時にレイアウトを調整
+  function controller_resize() {
+    // div controller のサイズ調整
+    var content_width = document.getElementById('content').clientWidth;
+    var content_height = document.getElementById('content').clientHeight;
+    var controller = document.getElementById('controller')
+    if ( content_width / content_height > 64/27 ) {  // controllerより横長の表示領域
+      controller.style.height = '100%';
+      controller.style.width = content_height * 64/27 + 'px';
+    } else {  // controllerより縦長の表示領域
+      controller.style.width = '100%';
+      controller.style.height = content_width * 27/64 + 'px';
+    }
+    // マスコンハンドルのサイズ調整
+    var area_width  = document.getElementById('mascon_area').clientWidth;
+    var area_height = document.getElementById('mascon_area').clientHeight;
+    var mascon = document.getElementById('speed');
+    mascon.style.width = area_height * 0.667 + 'px';  // 長さ
+    mascon.style.marginTop = area_height * 0.5 - 5 + 'px';  // 縦位置を調整
+    mascon.style.marginLeft = - (mascon.clientWidth - area_width) / 2 + 'px';  // 横位置ははみ出している分左へ
+  }
+</script>
