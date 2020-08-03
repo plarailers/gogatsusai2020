@@ -9,7 +9,8 @@ class Communication {
   HashMap<Integer, Integer> simulationSpeedMap;
   Queue<Byte> simulationBuffer;
   PApplet parent;
-  Serial port;
+  Serial esp32;  // ESP32 と Bluetooth でつながっている。
+  Serial arduino;  // Arduino と有線でつながっている。
   
   Communication(PApplet parent) {
     this.parent = parent;
@@ -19,13 +20,14 @@ class Communication {
     simulationSpeedMap.put(1, 255);
     simulationBuffer = new ArrayDeque<Byte>();
   }
-
+  
   void setup() {
     if (simulationMode) {
     } else {
-      port = new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200);  // Mac
-      // port = new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200);  // Macテスト用
-      // port = new Serial(parent, "COM8", 115200);  // Windows
+      esp32 = new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200);  // Mac
+      // esp32 = new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200);  // Macテスト用
+      // esp32 = new Serial(parent, "COM8", 115200);  // Windows
+      arduino = new Serial(parent, "", 9600);
     }
     updateSimulation();
   }
@@ -46,7 +48,7 @@ class Communication {
     if (simulationMode) {
       return simulationBuffer.size();
     } else {
-      return port.available();
+      return esp32.available() + arduino.available();
     }
   }
   
@@ -59,14 +61,13 @@ class Communication {
         return 0;
       }
     } else {
-      return port.read();
-    }
-  }
-  
-  void write(int data) {
-    if (simulationMode) {
-    } else {
-      port.write(data);
+      if (esp32.available() > 0) {
+        return esp32.read();
+      } else if (arduino.available() > 0) {
+        return arduino.read();
+      } else {
+        return 0;
+      }
     }
   }
   
@@ -75,8 +76,7 @@ class Communication {
     if (simulationMode) {
       simulationSpeedMap.put(trainId, speed);
     } else {
-      write((int) 'T');
-      write(speed);
+      esp32.write(speed);
     }
   }
   
@@ -84,8 +84,7 @@ class Communication {
   void sendToggle(int junctionId) {
     if (simulationMode) {
     } else {
-      write((int) 'J');
-      write(junctionId);
+      arduino.write(junctionId);
     }
   }
 }
