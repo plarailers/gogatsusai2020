@@ -2,6 +2,7 @@ import processing.serial.*;
 
 Serial myPort;  // Create object from Serial class
 char val;        // Data received from the serial port
+int v;
 
 void setup() 
 {
@@ -36,24 +37,34 @@ void keyPressed() {
       myPort.write('d');
       println('d');
       break;
+    case '0':
+      v = 0;
+      myPort.write(v);
+      println("0");
+      break;
     case '1':
-      myPort.write(10);
+      v = 10;
+      myPort.write(v);
       println("10");
       break;
     case '2':
-      myPort.write(20);
+      v = 20;
+      myPort.write(v);
       println("20");
       break;
     case '3':
-      myPort.write(30);
+      v = 30;
+      myPort.write(v);
       println("30");
       break;
     case '4':
-      myPort.write(40);
+      v = 40;
+      myPort.write(v);
       println("40");
       break;
     case '5':
-      myPort.write(50);
+      v = 50;
+      myPort.write(v);
       println("50");
       break;
   }
