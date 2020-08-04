@@ -68,9 +68,9 @@ void loop(){
   while(Serial.available() > 0){//シリアルで受け取った信号をもとにサーボを動かす
     data = Serial.read();
     servo_change(data);
-    for (int i = 0; i < num_sensor; i++){
+    /*for (int i = 0; i < num_sensor; i++){
       CdS_process(sensorPin[i]); //CdSセンサーからの情報をPCに送る。
-    }
+    }*/
   }
   for (int i = 0; i < num_sensor; i++){
     CdS_process(sensorPin[i]); //CdSセンサーからの情報をPCに送る。
