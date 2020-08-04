@@ -2,11 +2,11 @@
 #include<VarSpeedServo.h>
 
 //サーボ関係の定数、変数
-const int num_servo = 2;
+const int num_servo = 2;//サーボの数(ポイントの数)
 
-VarSpeedServo servo[num_servo];
+VarSpeedServo servo[num_servo]; //各サーボを入れる配列
 
-const int servoSpeed = 50; //1から255
+const int servoSpeed = 50; //1から255。サーボを回転させる速さ。
 
 const int servo_angle_straight[num_servo] = {0, 0}; //サーボを直進にする際の角度。適宜いじってください
 const int servo_angle_curve[num_servo] = {130, 180}; //サーボを曲げる際の角度。適宜いじってください
