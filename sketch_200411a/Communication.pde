@@ -3,14 +3,16 @@ import java.util.Queue;
 import java.util.ArrayDeque;
 import java.util.Map;
 
+// ESP32 や Arduino との通信をまとめる。
 // シミュレーションモードを使うと接続が無くてもある程度動作確認できる。
 class Communication {
   boolean simulationMode;
   HashMap<Integer, Integer> simulationSpeedMap;
-  Queue<Byte> simulationBuffer;
   PApplet parent;
   Serial esp32;  // ESP32 と Bluetooth でつながっている。
   Serial arduino;  // Arduino と有線でつながっている。
+  Queue<Integer> trainSignalBuffer;
+  Queue<Integer> sensorSignalBuffer;
   
   Communication(PApplet parent) {
     this.parent = parent;
@@ -18,7 +20,8 @@ class Communication {
     simulationSpeedMap = new HashMap<Integer, Integer>();
     simulationSpeedMap.put(0, 255);
     simulationSpeedMap.put(1, 255);
-    simulationBuffer = new ArrayDeque<Byte>();
+    trainSignalBuffer = new ArrayDeque<Integer>();
+    sensorSignalBuffer = new ArrayDeque<Integer>();
   }
   
   void setup() {
@@ -29,49 +32,45 @@ class Communication {
       // esp32 = new Serial(parent, "COM8", 115200);  // Windows
       arduino = new Serial(parent, "", 9600);
     }
-    updateSimulation();
+    update();
   }
   
-  void updateSimulation() {
+  void update() {
     if (simulationMode) {
-      for(Map.Entry<Integer, Integer> entry : simulationSpeedMap.entrySet()) {
+      for (Map.Entry<Integer, Integer> entry : simulationSpeedMap.entrySet()) {
         int trainId = entry.getKey();
         int speed = entry.getValue();
         if (speed > 0) {
-          simulationBuffer.add((byte) trainId);
+          trainSignalBuffer.add(trainId);
         }
       }
-    }
-  }
-  
-  int available() {
-    if (simulationMode) {
-      return simulationBuffer.size();
     } else {
-      return esp32.available() + arduino.available();
-    }
-  }
-  
-  int read() {
-    if (simulationMode) {
-      if (simulationBuffer.size() > 0) {
-        int id = simulationBuffer.remove();
-        return id;
-      } else {
-        return 0;
+      while (esp32.available() > 0) {
+        trainSignalBuffer.add(esp32.read());
       }
-    } else {
-      if (esp32.available() > 0) {
-        return esp32.read();
-      } else if (arduino.available() > 0) {
-        return arduino.read();
-      } else {
-        return 0;
+      while (arduino.available() > 0) {
+        sensorSignalBuffer.add(arduino.read());
       }
     }
   }
   
-  // 指定した trainId に目標速度を送る。
+  int availableTrainSignal() {
+    return trainSignalBuffer.size();
+  }
+  
+  int receiveTrainSignal() {
+    return trainSignalBuffer.remove();
+  }
+  
+  int availableSensorSignal() {
+    return sensorSignalBuffer.size();
+  }
+  
+  int receiveSensorSignal() {
+    return sensorSignalBuffer.remove();
+  }
+  
+  // 指定した車両に目標速度を送る。
   void sendSpeed(int trainId, int speed) {
     if (simulationMode) {
       simulationSpeedMap.put(trainId, speed);
@@ -80,7 +79,7 @@ class Communication {
     }
   }
   
-  // 指定した junctionId に切替命令を送る。
+  // 指定したポイントに切替命令を送る。
   void sendToggle(int junctionId) {
     if (simulationMode) {
     } else {
