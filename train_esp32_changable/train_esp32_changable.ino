@@ -142,10 +142,10 @@ void loop(){
     else if (status == 0) { //現在停車中ならstartさせてからmove(v)する
       start();
       status = 1;
-      move(&v);
     }
-    else { //それ以外はmove(v)
-      move(&v);
-    }
+  }
+
+  if (status = 1) { //statusが1(つまり進行中)はmoveさせる。
+    move(&v);
   }
 }
