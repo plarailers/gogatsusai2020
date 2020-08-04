@@ -16,7 +16,7 @@ bool servo_status[num_servo] = {straight, straight}; //各サーボの状態を�
 
 byte data = 0;//受信データ格納用
 
-void servo_change(byte servo_id) { //servoの向きを切り替える関数。
+void servo_change(byte servo_id) { //servoの向きを切り替える関数。引数は変えたいサーボのid
   if (servo_status[servo_id] == straight) {
     servo[servo_id].write(servo_angle_curve[servo_id], servoSpeed, true);
     servo_status[servo_id] = curve;
@@ -35,7 +35,7 @@ double ave[num_sensor][4] = {};
 const int df = 4;
 int value;
 
-//CdSセンサーのデータを元に車両が来ているかいないか判定してPCにその情報を送る関数。
+//CdSセンサーのデータを元に車両が来ているかいないか判定してPCにその情報を送る関数。引数は読み取りたいセンサーのid
 void CdS_process(int sensor_id){
   value = analogRead(sensorPin[sensor_id]);  //CdSセンサーで明るさを計測
   //Serial.print(" light:");
@@ -73,6 +73,6 @@ void loop(){
     }*/
   }
   for (int i = 0; i < num_sensor; i++){
-    CdS_process(sensorPin[i]); //CdSセンサーからの情報をPCに送る。
+    CdS_process(sensorPin[i]); //CdSセンサーから車両の通過を検知した場合にはPCに送る
   }
 }
