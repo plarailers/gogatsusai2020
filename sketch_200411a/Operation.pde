@@ -1,46 +1,83 @@
-// 列車制御に使う定数
-static final int STOPMERGIN = 20;  // Junctionの何m手前で停止するか
+// --------------------------------------------------------------
+// 列車制御に使う定数【ここは適切に書き換える】
+static final int STOPMERGIN = 10;  // Junctionや先行列車の何cm手前で停止するか
+// ↑STOPMERGINによる停止位置と駅の停止位置(stationPosition)は同じ位置に来てはならない。
 static final int TRAINLENGTH = 30;  // 列車1編成の長さ
 static final int MINSTOPTIME = 5;  // 最低停車時間
+static final int MAXSPEED = 20;  // 車両の最高速度 (cm/s)
+static final int LOOPTIME = 5;  // ダイヤを一周全部実施したら、何秒待って時刻をリセットする？
+boolean finishFlag[] = {false};  // 車両の台数ぶんfalseを代入
+// --------------------------------------------------------------
 
+// 初期状態へ戻す関数
+void resetAll() {
+  for (int i = 0; i < LOOPTIME; i++) {  // LOOPTIMEだけ待機
+    display.draw(state);
+    try{
+      Thread.sleep(1000);
+    } catch(InterruptedException ex){
+      ex.printStackTrace();
+    }
+    time += 1000;
+  }
+  // リセット
+  time = -1;
+  timetable.reset();
+}
 // 【時刻表更新】moveResultを受け取って、時刻表を更新する
 void timetableUpdate(Train train, MoveResult moveResult) {
-  Info info = timetable.getByTrainId(train.id);
+  Info currentInfo = timetable.getByTrainId(train.id);
 
   if (moveResult == MoveResult.PassedStation) {
-    timetable.getByTrainId(train.id).used = true;  // 到着済・通過済に変更
+    currentInfo.used = true;  // 到着済・通過済に変更
     
-    if (info != null && info.isArrival()) {  // 到着処理
-      println("[Log] train" + train.id + ": Arrived station" + info.stationId);
-      if (timetable.getByTrainId(train.id).time < time/1000 + MINSTOPTIME) {  // 遅れて到着した場合でも最低停車時間だけは止まるよう、出発時刻情報を書き換える
-        timetable.getByTrainId(train.id).time = time/1000 + MINSTOPTIME;
-        println("[Log] train" + train.id + " は遅れて到着したため、出発時刻を"+ (time/1000+MINSTOPTIME)+ "に繰り下げました.");
-      } 
-    } else if (info != null && info.isPassage()) {  // 通過処理
-      println("[Log] train" + train.id + ": Passed station" + info.stationId);
+    if (currentInfo != null && currentInfo.isArrival()) {  // 到着処理
+      println(time + "[Log] train" + train.id + ": Arrived station" + currentInfo.stationId);
+      Info nextInfo = timetable.getByTrainId(train.id);  // 次に実施すべき時刻(=出発)を取得
+      if (nextInfo != null) {
+        if (nextInfo.time < time/1000 + MINSTOPTIME) {  // 遅れて到着した場合、最低停車時間だけは止まるように出発時刻情報を書き換える
+          nextInfo.time = time/1000 + MINSTOPTIME;
+          println(time + "[Log] train" + train.id + " は遅れて駅" + currentInfo.stationId + "に到着したため、出発時刻を"+ (time/1000+MINSTOPTIME)+ "に繰り下げました.");
+        } 
+      } else {  // ダイヤを全部こなして運転を終了した場合
+        finishFlag[train.id] = true;
+      }
+      
+    } else if (currentInfo != null && currentInfo.isPassage()) {  // 通過処理
+      println(time + "[Log] train" + train.id + ": Passed station" + currentInfo.stationId);
+    }
+
+    int i = 0;
+    while (finishFlag[i]) {
+      i++;
+      if (i == finishFlag.length) {  // すべての列車の運転が終了したら、初期状態へリセット
+        println(time + "[Log] ダイヤをすべて実施しました。指定時間経過後に初期状態へリセットします");
+        resetAll();
+        break;
+      }
     }
   }
   // 出発処理は列車制御のところで行う
 }
 
 // 【列車制御】指定された列車の速度を返す
-// とりあえず、255か0で返します
 int getTargetSpeed(Train me) {
   StopPoint stopPoint = getStopPoint(me);  // 停止点取得
+  println(time + " " + stopPoint.section.id + " " + stopPoint.mileage);
   int distance = getDistance(me.currentSection, me.mileage, stopPoint.section, stopPoint.mileage);  // 停止点までの距離を取得
+  println(me.currentSection.id + " " + me.mileage + " "+ distance);
   int targetSpeed = 0;
-  if (distance > 100) {  // 停止点までの距離に応じて速度を適当に調整
-    targetSpeed = 255;
-  } else if (distance > 50) {
-    targetSpeed = 128;
+  if (distance > 50) {  // 停止点までの距離に応じて速度を適当に調整
+    targetSpeed = MAXSPEED;
   } else if (distance > 0) {
-    targetSpeed = 64;
+    targetSpeed = (int)((float)distance/50 * MAXSPEED * 0.9 + (float)MAXSPEED * 0.1);
   }
+
   // 出発処理
   if (me.targetSpeed == 0 && targetSpeed > 0) {  // targetSpeedがゼロから>0に変化したとき
     if (timetable.getByTrainId(me.id).isDeparture()) {  // 未出発であれば
       timetable.getByTrainId(me.id).used = true;  // 駅を出発済に変更
-      println("[Log] train" + me.id + ": Departed");
+      println(time + "[Log] train" + me.id + ": Departed");
     }
   }
   state.trainList.get(me.id).targetSpeed = targetSpeed;
@@ -52,7 +89,14 @@ int getTargetSpeed(Train me) {
 // 線路上のある点からある点までの距離を返す
 int getDistance(Section s1, int mileage1, Section s2, int mileage2) {
   int distance = 0;
-  Section testSection = s1;
+  Section testSection;
+  if (s1.id == s2.id && mileage1 > mileage2) { // |---2--1-|--------|-----
+    testSection = s1.targetJunction.getPointedSection();
+    distance += s1.length - mileage1;
+  } else {  // |------1-|--------2-|------
+    testSection = s1;
+  }
+  
   while (testSection.id != s2.id) {
     distance += testSection.length;
     testSection = testSection.targetJunction.getPointedSection();
@@ -63,18 +107,16 @@ int getDistance(Section s1, int mileage1, Section s2, int mileage2) {
 // 【停止点算出】指定された列車の停止点を返す
 StopPoint getStopPoint(Train me) {
   Section testSection = me.currentSection;
-
   do {
     // 現在のセクションに駅があり、そこで停車の場合
     if (isStopping(testSection, me.id)) {
+      println("isStopping == true");
       Info info = timetable.getByStationTrainId(Station.getBySection(testSection).id, me.id);  // その駅の最も近い未実施時刻情報を取得
       // 直近の未実施時刻が、現在セクションにある駅の時刻と同一＝この駅で止まる筈の場合
       if (timetable.getByTrainId(me.id).time == info.time) {
         if (info.isDeparture() && isSignalGo(testSection) && info.time < time/1000) {  // 到着済で、分岐器開通し前方在線なし、出発時刻を過ぎている
-          // 最低停車時間を経過していない場合は強制的に止める
-
           testSection = testSection.targetJunction.getPointedSection();  // 次のsectionへ進む
-        } else {
+        } else {  // 最低停車時間を経過していない場合は強制的に止める
           return new StopPoint(testSection, testSection.stationPosition);
         }
       } else {
@@ -134,7 +176,7 @@ Boolean junctionControl(Junction junction) {
         Info info = timetable.getByTrainId(inTrain.id);  // 近づいてくる列車の時刻情報を取得
         Section arrTrack = Station.getById(info.stationId).trackList.get(info.trackId);  // 近づいてくる列車の着発番線を取得
         if (arrTrack.id != junction.getPointedSection().id) {  // 到着番線と、現在開通している番線が違えば、合わせる
-          println("[Log] Junction" + junction.id+": Toggled");
+          println(time + "[Log] Junction" + junction.id+": Toggled");
           return true;
         } else {
           return false;
@@ -164,7 +206,7 @@ Boolean junctionControl(Junction junction) {
         }
         if (info != null) {  // <-このinfoは、最も早く出発or通過する列車の時刻情報
           if (junction.getInSection().id != station.trackList.get(info.trackId).id) {  // 出発番線と、現在開通している番線が異なれば、合わせる
-            println("[Log] Junction" + junction.id+": Toggled");
+            println(time + "[Log] Junction" + junction.id+": Toggled");
             return true;
           } else {
             return false;
@@ -188,10 +230,10 @@ void positionAdjust(int id) {
   Sensor s = Sensor.getById(id);  // センサ取得
   Train t = detectTrain(s.belongSection);  // センサがおかれているsectionに在線する列車を取得
   if (t != null) {
-    println("[Log] センサ"+id+"(section="+s.belongSection.id+", position="+s.position+") を 列車"+t.id+" が通過. 列車位置補正:"+t.mileage+"->"+s.position);
+    println(time + "[Log] センサ"+id+"(section="+s.belongSection.id+", position="+s.position+") を 列車"+t.id+" が通過. 列車位置補正:"+t.mileage+"->"+s.position);
     MoveResult move = state.trainList.get(t.id).move(s.position - t.mileage);  // ずれの分だけ列車位置を補正
   } else {
-    println("[Log] センサ"+id+"(section="+s.belongSection.id+", position="+s.position+") から入力がありましたが、当該セクションに在線なし. 位置補正失敗.");
+    println(time + "[Log] センサ"+id+"(section="+s.belongSection.id+", position="+s.position+") から入力がありましたが、当該セクションに在線なし. 位置補正失敗.");
   }
 }
 

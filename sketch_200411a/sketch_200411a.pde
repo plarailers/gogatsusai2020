@@ -31,7 +31,7 @@ void draw() {
   // 各列車について行う
   for (Train train : state.trainList) {
     int targetSpeed = getTargetSpeed(train);
-    MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed/20);  // 適当な距離進ませる
+    MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed);  // 適当な距離進ませる
     timetableUpdate(train, moveResult);  // 時刻表を更新する
     communication.sendSpeed(train.id, targetSpeed);
   }
@@ -39,7 +39,7 @@ void draw() {
   // 各ポイントについて行う
   for (Junction junction : state.junctionList) {
     if (junctionControl(junction)) {  // ポイントを切り替えるべきか判定
-      Junction.getById(junction.id).toggle();  // ポイントを切り替える
+      junction.toggle();  // ポイントを切り替える
       communication.sendToggle(junction.id);
     }
   }
@@ -55,11 +55,10 @@ void draw() {
   display.draw(state);
   
   try{  // 一定時間待つ
-    Thread.sleep(500);   
+    Thread.sleep(500);
   } catch(InterruptedException ex){
     ex.printStackTrace();
   }
-
-  time = millis();
+  time += 500;
     
 }

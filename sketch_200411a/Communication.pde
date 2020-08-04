@@ -11,7 +11,7 @@ class Communication {
     isSimulated = false;
     simulatedSpeed = new HashMap<Integer, Integer>();
     simulatedSpeed.put(0, 255);
-    simulatedSpeed.put(1, 255);
+    // simulatedSpeed.put(1, 255);
     simulatedBuffer = new ArrayDeque<Byte>();
   }
   
