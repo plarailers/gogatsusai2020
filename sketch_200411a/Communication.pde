@@ -1,66 +1,108 @@
+import processing.serial.*;
 import java.util.Queue;
 import java.util.ArrayDeque;
 import java.util.Map;
 
+// ESP32 や Arduino との通信をまとめる。
+// シミュレーションモードを使うと接続が無くてもある程度動作確認できる。
 class Communication {
-  boolean isSimulated;
-  HashMap<Integer, Integer> simulatedSpeed;
-  Queue<Byte> simulatedBuffer;
+  boolean simulationMode;
+  HashMap<Integer, Integer> simulationSpeedMap;
+  PApplet parent;
+  HashMap<Integer, Serial> esp32Map;  // 複数の ESP32 と Bluetooth でつながっている。
+  Serial arduino;  // Arduino と有線でつながっている。
+  Queue<TrainSignal> trainSignalBuffer;
+  Queue<Integer> sensorSignalBuffer;
   
-  Communication() {
-    isSimulated = false;
-    simulatedSpeed = new HashMap<Integer, Integer>();
-    simulatedSpeed.put(0, 255);
-    // simulatedSpeed.put(1, 255);
-    simulatedBuffer = new ArrayDeque<Byte>();
+  Communication(PApplet parent) {
+    this.parent = parent;
+    simulationMode = false;
+    simulationSpeedMap = new HashMap();
+    esp32Map = new HashMap();
+    trainSignalBuffer = new ArrayDeque();
+    sensorSignalBuffer = new ArrayDeque();
   }
   
-  void updateSimulation() {
-    if (isSimulated) {
-      for(Map.Entry<Integer, Integer> entry : simulatedSpeed.entrySet()) {
+  void setup() {
+    if (simulationMode) {
+      simulationSpeedMap.put(0, 255);
+      simulationSpeedMap.put(1, 255);
+    } else {
+      esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));  // Mac
+      // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // Macテスト用
+      // esp32Map.put(0, new Serial(parent, "COM8", 115200));  // Windows
+      arduino = new Serial(parent, "", 9600);
+    }
+    update();
+  }
+  
+  void update() {
+    if (simulationMode) {
+      for (Map.Entry<Integer, Integer> entry : simulationSpeedMap.entrySet()) {
         int trainId = entry.getKey();
         int speed = entry.getValue();
         if (speed > 0) {
-          simulatedBuffer.add((byte) trainId);
+          trainSignalBuffer.add(new TrainSignal(trainId, speed));
         }
       }
-    }
-  }
-  
-  int available() {
-    if (isSimulated) {
-      return simulatedBuffer.size();
     } else {
-      return 0;
-    }
-  }
-  
-  byte read() {
-    if (isSimulated) {
-      if (simulatedBuffer.size() > 0) {
-        byte id = simulatedBuffer.remove();
-        return id;
-      } else {
-        return 0;
+      for (Map.Entry<Integer, Serial> entry : esp32Map.entrySet()) {
+        int trainId = entry.getKey();
+        Serial esp32 = entry.getValue();
+        if (esp32 != null) {
+          while (esp32.available() > 0) {
+            trainSignalBuffer.add(new TrainSignal(trainId, esp32.read()));
+          }
+        }
       }
-    } else {
-      return 0;
+      while (arduino.available() > 0) {
+        sensorSignalBuffer.add(arduino.read());
+      }
     }
   }
   
-  void write(byte data) {
+  int availableTrainSignal() {
+    return trainSignalBuffer.size();
   }
   
+  TrainSignal receiveTrainSignal() {
+    return trainSignalBuffer.remove();
+  }
+  
+  int availableSensorSignal() {
+    return sensorSignalBuffer.size();
+  }
+  
+  int receiveSensorSignal() {
+    return sensorSignalBuffer.remove();
+  }
+  
+  // 指定した車両に目標速度を送る。
   void sendSpeed(int trainId, int speed) {
-    if (isSimulated) {
-      simulatedSpeed.put(trainId, speed);
+    if (simulationMode) {
+      simulationSpeedMap.put(trainId, speed);
+    } else {
+      Serial esp32 = esp32Map.get(trainId);
+      if (esp32 != null) {
+        esp32.write(speed);
+      }
     }
-    write((byte) 'T');
-    write((byte) speed);
   }
   
+  // 指定したポイントに切替命令を送る。
   void sendToggle(int junctionId) {
-    write((byte) 'J');
-    write((byte) junctionId);
+    if (simulationMode) {
+    } else {
+      arduino.write(junctionId);
+    }
+  }
+}
+
+class TrainSignal {
+  int trainId;
+  int delta;
+  TrainSignal(int trainId, int delta) {
+    this.trainId = trainId;
+    this.delta = delta;
   }
 }
