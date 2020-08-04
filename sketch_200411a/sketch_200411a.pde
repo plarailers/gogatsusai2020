@@ -16,8 +16,8 @@ void setup() {
   communication = new Communication(this);
   communication.simulationMode = true;
   communication.setup();
-  while (communication.available() > 0) {  // 各列車について行う
-    int id = communication.read();  // 列車id取得
+  while (communication.availableTrainSignal() > 0) {  // 各列車について行う
+    int id = communication.receiveTrainSignal();  // 列車id取得
     state.trainList.get(id).id = id;  // 当該列車を取得
   }
 }
@@ -26,7 +26,7 @@ int prevTime = -1;
 int time = 0;
 
 void draw() {
-  communication.updateSimulation();
+  communication.update();
 
   // 各列車について行う
   for (Train train : state.trainList) {
@@ -49,6 +49,11 @@ void draw() {
   if (keyPressed == true) {  // (デバッグ用)キーを押したらセンサ0の位置補正
     println("keyPressed");
     positionAdjust(0);
+  }
+  
+  while (communication.availableSensorSignal() > 0) {
+    int sensorId = communication.receiveSensorSignal();
+    positionAdjust(sensorId);
   }
   
   // 描画
