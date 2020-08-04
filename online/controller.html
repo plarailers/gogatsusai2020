@@ -47,7 +47,7 @@
 </html>
 
 <script>
-  // var ws = new WebSocket('wss://60jt3xl73m.execute-api.ap-northeast-1.amazonaws.com/dev');  // サーバ通信用のwebsocket
+  var ws = new WebSocket('wss://60jt3xl73m.execute-api.ap-northeast-1.amazonaws.com/dev');  // サーバ通信用のwebsocket
   var speed = 0;
 
   // 【スピードをサーバに送信】0.4secおきに送信する
@@ -57,7 +57,7 @@
     if (isTimerOn == false) {
       timer = setTimeout(function(){
         speed = document.getElementById('speed').value;
-        // ws.send(JSON.stringify({"speed": speed}));
+        ws.send(JSON.stringify({"password": pw, "speed": speed}));
         console.log(speed);
         isTimerOn = false;
       }, 400);  // ハンドルを動かした0.4sec後に送信
@@ -69,8 +69,9 @@
   var icon = document.getElementById('message_icon');
   var loader = document.getElementById('loader');
   var sendTimer;
+  var pw = '';
   document.getElementById('pw_send').onclick = function() {
-    var pw = document.getElementById('pw_input').value;
+    pw = document.getElementById('pw_input').value;
     if (!pw) {  // pw空欄の場合はメッセージ表示
       message.innerText = 'パスワード欄が空欄です。入力してください。';
     } else {
