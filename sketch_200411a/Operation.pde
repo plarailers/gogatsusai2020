@@ -1,7 +1,6 @@
 // --------------------------------------------------------------
 // 列車制御に使う定数【ここは適切に書き換える】
 static final int STOPMERGIN = 10;  // Junctionや先行列車の何cm手前で停止するか
-// ↑STOPMERGINによる停止位置と駅の停止位置(stationPosition)は同じ位置に来てはならない。
 static final int TRAINLENGTH = 30;  // 列車1編成の長さ
 static final int MINSTOPTIME = 5;  // 最低停車時間
 static final int MAXSPEED = 20;  // 車両の最高速度 (cm/s)
@@ -20,9 +19,12 @@ void resetAll() {
     }
     time += 1000;
   }
-  // リセット
-  time = -1;
+  time = -1000;  // リセット
   timetable.reset();
+  int i = 0;
+  for (i = 0; i < finishFlag.length; i++) {
+    finishFlag[i] = false;
+  }
 }
 // 【時刻表更新】moveResultを受け取って、時刻表を更新する
 void timetableUpdate(Train train, MoveResult moveResult) {
@@ -63,9 +65,7 @@ void timetableUpdate(Train train, MoveResult moveResult) {
 // 【列車制御】指定された列車の速度を返す
 int getTargetSpeed(Train me) {
   StopPoint stopPoint = getStopPoint(me);  // 停止点取得
-  println(time + " " + stopPoint.section.id + " " + stopPoint.mileage);
   int distance = getDistance(me.currentSection, me.mileage, stopPoint.section, stopPoint.mileage);  // 停止点までの距離を取得
-  println(me.currentSection.id + " " + me.mileage + " "+ distance);
   int targetSpeed = 0;
   if (distance > 50) {  // 停止点までの距離に応じて速度を適当に調整
     targetSpeed = MAXSPEED;
@@ -89,13 +89,7 @@ int getTargetSpeed(Train me) {
 // 線路上のある点からある点までの距離を返す
 int getDistance(Section s1, int mileage1, Section s2, int mileage2) {
   int distance = 0;
-  Section testSection;
-  if (s1.id == s2.id && mileage1 > mileage2) { // |---2--1-|--------|-----
-    testSection = s1.targetJunction.getPointedSection();
-    distance += s1.length - mileage1;
-  } else {  // |------1-|--------2-|------
-    testSection = s1;
-  }
+  Section testSection = s1;
   
   while (testSection.id != s2.id) {
     distance += testSection.length;
@@ -110,7 +104,6 @@ StopPoint getStopPoint(Train me) {
   do {
     // 現在のセクションに駅があり、そこで停車の場合
     if (isStopping(testSection, me.id)) {
-      println("isStopping == true");
       Info info = timetable.getByStationTrainId(Station.getBySection(testSection).id, me.id);  // その駅の最も近い未実施時刻情報を取得
       // 直近の未実施時刻が、現在セクションにある駅の時刻と同一＝この駅で止まる筈の場合
       if (timetable.getByTrainId(me.id).time == info.time) {
@@ -187,13 +180,10 @@ Boolean junctionControl(Junction junction) {
 
     // in2->out1 という分岐器の場合、
     } else if (junction.inSectionList.size() > 1 && junction.outSectionList.size() == 1) {
-      // 現在開通している進路に列車がいる場合、この列車がいなくなるまで分岐器が動かないよう鎖錠
       Train inTrain = detectTrain(junction.getInSection());  // 分岐器開通方向の列車を取得
-      if (inTrain != null) {
-        // println("Junction"+junction.id+":接近鎖錠中");
+      if (inTrain != null) {  // 現在開通している進路に列車がいる場合、この列車がいなくなるまで分岐器が動かないよう鎖錠
         return false;
-      } else {
-        // 鎖錠しない場合、最も早く出発or通過する列車の番線に合わせる
+      } else {  // 鎖錠しない場合、最も早く出発or通過する列車の番線に合わせる
         Station station = getBelongStation(junction);  // junctionが属する駅を取得
         Info info = timetable.getDepartureByTrackId(station.id, station.getTrackIdBySection(inSection));  // とりあえず現在開通している番線の出発時刻情報を取得
         for (Section section : junction.inSectionList) {
@@ -219,7 +209,6 @@ Boolean junctionControl(Junction junction) {
       return false;
     }
   } else {
-    // println("Junction"+junction.id+":轍鎖鎖錠中");
     return false;
   }
   

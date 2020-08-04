@@ -25,8 +25,8 @@ class Communication {
   
   void setup() {
     if (simulationMode) {
-      simulationSpeedMap.put(0, 255);
-      simulationSpeedMap.put(1, 255);
+      simulationSpeedMap.put(0, 0);
+      simulationSpeedMap.put(1, 0);
     } else {
       esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));  // Mac
       // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // Macテスト用

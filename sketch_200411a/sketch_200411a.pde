@@ -24,17 +24,16 @@ void setup() {
   }
 }
 
-int prevTime = -1;
 int time = 0;
 
 void draw() {
   communication.update();
 
-  // 各列車について行う
+  // 各車両について行う
   for (Train train : state.trainList) {
     int targetSpeed = getTargetSpeed(train);
-    MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed);  // 適当な距離進ませる
-    timetableUpdate(train, moveResult);  // 時刻表を更新する
+    // MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed);  // 適当な距離進ませる
+    // timetableUpdate(train, moveResult);  // 時刻表を更新する
     communication.sendSpeed(train.id, targetSpeed);
   }
 
@@ -46,11 +45,14 @@ void draw() {
     }
   }
 
-  // 車両から進んだ距離を取得
+  // 車両から進んだ距離を取得し、シミュレーションを更新する
   while (communication.availableTrainSignal() > 0) {
     TrainSignal trainSignal = communication.receiveTrainSignal();
     int id = trainSignal.trainId;
     int delta = trainSignal.delta;
+    Train train = state.trainList.get(id);
+    MoveResult moveResult = train.move(delta);
+    timetableUpdate(train, moveResult);
   }
   
   // センサ入力で車両の位置補正を行う

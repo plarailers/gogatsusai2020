@@ -69,6 +69,13 @@ class Timetable {
     }
     return null;
   }
+
+  // すべての時刻情報を「未実施」にリセット
+  void reset() {
+    for (Info info : infoList) {
+      info.used = false;
+    }
+  }
 }
 
 enum InfoType {

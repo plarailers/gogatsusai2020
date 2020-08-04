@@ -60,6 +60,43 @@ class Display {
         text("Section2 (1番線)",600,190);
         text("Section3 (2番線)",600,290);
         text("Section4",800,190);
+
+        // 信号の描画
+        Signal sig0Dep = Signal.R;  // Section0出発
+        if (detectTrain(state.sectionList.get(1)) == null) {
+            sig0Dep = Signal.G;
+        }
+        drawSignal(300,170,2,sig0Dep);
+
+        Signal sig0Arr = Signal.R;  // section0場内
+        if (detectTrain(state.sectionList.get(0)) == null) {
+            sig0Arr = Signal.G;
+        }
+        drawSignal(100,170,2,sig0Arr);
+
+        Signal sig2Dep = Signal.R;  // Section2出発
+        if (detectTrain(state.sectionList.get(4)) == null && state.junctionList.get(2).getInSection().id == 2) {
+            sig2Dep = Signal.G;
+        }
+        drawSignal(700,170,2,sig2Dep);
+
+        Signal sig3Dep = Signal.R;  // section3出発
+        if (detectTrain(state.sectionList.get(4)) == null && state.junctionList.get(2).getInSection().id == 3) {
+            sig3Dep = Signal.G;
+        }
+        drawSignal(700,330,2,sig3Dep);
+
+        Signal sig2Arr = Signal.R;  // section2場内
+        if (detectTrain(state.sectionList.get(2)) == null && state.junctionList.get(1).getPointedSection().id == 2) {
+            sig2Arr = Signal.G;
+        }
+        drawSignal(510,140,2,sig2Arr);
+
+        Signal sig3Arr = Signal.R;  // section3場内
+        if (detectTrain(state.sectionList.get(3)) == null && state.junctionList.get(1).getPointedSection().id == 3) {
+            sig3Arr = Signal.G;
+        }
+        drawSignal(500,170,2,sig3Arr);
         
         // 以下で電車の座標を決定
         for (Train state_train : state.trainList) {
@@ -115,44 +152,6 @@ class Display {
         fill(240);
         textSize(20);
         text("time : "+time/1000, 800, 400);
-
-
-        // 信号描画
-        Signal sig0Dep = Signal.R;  // Section0出発
-        if (detectTrain(state.sectionList.get(1)) == null) {
-            sig0Dep = Signal.G;
-        }
-        drawSignal(300,170,2,sig0Dep);
-
-        Signal sig0Arr = Signal.R;  // section0場内
-        if (detectTrain(state.sectionList.get(0)) == null) {
-            sig0Arr = Signal.G;
-        }
-        drawSignal(100,170,2,sig0Arr);
-
-        Signal sig2Dep = Signal.R;  // Section2出発
-        if (detectTrain(state.sectionList.get(4)) == null && state.junctionList.get(2).getInSection().id == 2) {
-            sig2Dep = Signal.G;
-        }
-        drawSignal(700,170,2,sig2Dep);
-
-        Signal sig3Dep = Signal.R;  // section3出発
-        if (detectTrain(state.sectionList.get(4)) == null && state.junctionList.get(2).getInSection().id == 3) {
-            sig3Dep = Signal.G;
-        }
-        drawSignal(700,330,2,sig3Dep);
-
-        Signal sig2Arr = Signal.R;  // section2場内
-        if (detectTrain(state.sectionList.get(2)) == null && state.junctionList.get(1).getPointedSection().id == 2) {
-            sig2Arr = Signal.G;
-        }
-        drawSignal(510,140,2,sig2Arr);
-
-        Signal sig3Arr = Signal.R;  // section3場内
-        if (detectTrain(state.sectionList.get(3)) == null && state.junctionList.get(1).getPointedSection().id == 3) {
-            sig3Arr = Signal.G;
-        }
-        drawSignal(500,170,2,sig3Arr);
     }
 
     void drawSignal(float x, float y, int sigNum, Signal sig) {
