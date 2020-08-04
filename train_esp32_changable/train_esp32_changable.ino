@@ -4,7 +4,7 @@
 //さらに改良する場合はmoveの中でモータを停止状態から動かす時に、inputを急増させてから徐々に落とすとうまくいくそうです。
 //そのようなモータの初期トルクに対応するための対策はまだ考えられていません。
 
-#include <BluetoothSerial.h>
+#include "BluetoothSerial.h"
 BluetoothSerial SerialBT;
 
 /*調整する変数--------------------------------*/
@@ -145,7 +145,7 @@ void loop(){
     }
   }
 
-  if (status = 1) { //statusが1(つまり進行中)はmoveさせる。
+  if (status == 1) { //statusが1(つまり進行中)はmoveさせる。
     move(&v);
   }
 }
