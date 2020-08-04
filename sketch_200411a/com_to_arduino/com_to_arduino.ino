@@ -72,4 +72,7 @@ void loop(){
       CdS_process(sensorPin[i]); //CdSセンサーからの情報をPCに送る。
     }
   }
+  for (int i = 0; i < num_sensor; i++){
+    CdS_process(sensorPin[i]); //CdSセンサーからの情報をPCに送る。
+  }
 }
