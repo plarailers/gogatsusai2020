@@ -37,7 +37,7 @@ int value;
 
 //CdSセンサーのデータを元に車両が来ているかいないか判定してPCにその情報を送る関数。
 void CdS_process(int sensor_id){
-  value = analogRead(sensor_id);  //CdSセンサーで明るさを計測
+  value = analogRead(sensorPin[sensor_id]);  //CdSセンサーで明るさを計測
   //Serial.print(" light:");
   //Serial.println(value);  //読み取った明るさを表示
   for(int i=0; i<5; i++){
