@@ -11,7 +11,7 @@ class Communication {
   PApplet parent;
   Serial esp32;  // ESP32 と Bluetooth でつながっている。
   Serial arduino;  // Arduino と有線でつながっている。
-  Queue<Integer> trainSignalBuffer;
+  Queue<TrainSignal> trainSignalBuffer;
   Queue<Integer> sensorSignalBuffer;
   
   Communication(PApplet parent) {
@@ -20,7 +20,7 @@ class Communication {
     simulationSpeedMap = new HashMap<Integer, Integer>();
     simulationSpeedMap.put(0, 255);
     simulationSpeedMap.put(1, 255);
-    trainSignalBuffer = new ArrayDeque<Integer>();
+    trainSignalBuffer = new ArrayDeque<TrainSignal>();
     sensorSignalBuffer = new ArrayDeque<Integer>();
   }
   
@@ -41,12 +41,12 @@ class Communication {
         int trainId = entry.getKey();
         int speed = entry.getValue();
         if (speed > 0) {
-          trainSignalBuffer.add(trainId);
+          trainSignalBuffer.add(new TrainSignal(trainId, speed));
         }
       }
     } else {
       while (esp32.available() > 0) {
-        trainSignalBuffer.add(esp32.read());
+        trainSignalBuffer.add(new TrainSignal(0, esp32.read()));
       }
       while (arduino.available() > 0) {
         sensorSignalBuffer.add(arduino.read());
@@ -58,7 +58,7 @@ class Communication {
     return trainSignalBuffer.size();
   }
   
-  int receiveTrainSignal() {
+  TrainSignal receiveTrainSignal() {
     return trainSignalBuffer.remove();
   }
   
@@ -85,5 +85,14 @@ class Communication {
     } else {
       arduino.write(junctionId);
     }
+  }
+}
+
+class TrainSignal {
+  int trainId;
+  int delta;
+  TrainSignal(int trainId, int delta) {
+    this.trainId = trainId;
+    this.delta = delta;
   }
 }

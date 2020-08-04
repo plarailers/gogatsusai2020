@@ -17,7 +17,9 @@ void setup() {
   communication.simulationMode = true;
   communication.setup();
   while (communication.availableTrainSignal() > 0) {  // 各列車について行う
-    int id = communication.receiveTrainSignal();  // 列車id取得
+    TrainSignal trainSignal = communication.receiveTrainSignal();  // 列車id取得
+    int id = trainSignal.trainId;
+    int delta = trainSignal.delta;
     state.trainList.get(id).id = id;  // 当該列車を取得
   }
 }
@@ -44,6 +46,13 @@ void draw() {
     }
   }
 
+  // 車両から進んだ距離を取得
+  while (communication.availableTrainSignal() > 0) {
+    TrainSignal trainSignal = communication.receiveTrainSignal();
+    int id = trainSignal.trainId;
+    int delta = trainSignal.delta;
+  }
+  
   // センサ入力で車両の位置補正を行う
   // センサ入力があったときに関数 positionAdjust(sensorId) を呼んでください
   if (keyPressed == true) {  // (デバッグ用)キーを押したらセンサ0の位置補正
