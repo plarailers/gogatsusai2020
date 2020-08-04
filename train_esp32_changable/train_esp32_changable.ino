@@ -140,7 +140,7 @@ void loop(){
       status = 0;
     }
     else if (status == 0) { //現在停車中ならstartさせてからmove(v)する
-      start();
+      //start(); start関数を使った場合動き出した直後に止まってしまうバグが見つかったのでコメントアウトしておきます。
       status = 1;
     }
   }
