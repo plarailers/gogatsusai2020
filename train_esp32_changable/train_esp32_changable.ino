@@ -47,7 +47,7 @@ void move(double *speed_id) {//引数のspeed_idは速度目標値
     period = new_time - old_time;//一回転の周期を計測
     old_time = new_time;
     //PCに1回転ごとに信号を送る
-    SerialBT.println('o');
+    //SerialBT.println('o');
 
     //周期periodを速度speedに変換
     speed = 2000*3.1415926535*r/(double)period;
@@ -130,22 +130,22 @@ void loop(){
   Serial.println(input);
 
   new_time = millis();
-  //SerialBT.write('a');//通信テスト用
+  // SerialBT.write('a');//通信テスト用
 
   if (SerialBT.available()>0) {
     v = SerialBT.read();
-    SerialBT.write(v);
+    SerialBT.write(v);  //デバッグ用（来たやつ返す）
     if (v == 0) { //送られてきた速度が0なら止める。
       stop();
       status = 0;
     }
     else if (status == 0) { //現在停車中ならstartさせてからmove(v)する
-      start();
+      //start();  //start関数が不調？
       status = 1;
-      move(&v);
     }
-    else { //それ以外はmove(v)
-      move(&v);
-    }
+  }
+
+  if (status == 1) { //statusが1(つまり進行中)はmoveさせる。
+    move(&v);
   }
 }
