@@ -75,7 +75,7 @@
     if (!pw) {  // pw空欄の場合はメッセージ表示
       message.innerText = 'パスワード欄が空欄です。入力してください。';
     } else {
-      // ws.send(JSON.stringify({"password": pw}));  // pw送信
+      ws.send(JSON.stringify({"password": pw}));  // pw送信
       console.log('{"password": '+pw+'}');
       message.innerText = 'パスワードを確認中です。少々お待ちください。';
       loader.style.visibility = 'visible';
