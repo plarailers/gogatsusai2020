@@ -1,17 +1,16 @@
-const byte max_Serial_servo_id[3] = {1, 3, 5}; //各子艦のサーボのidの中で最大のものを書いた配列
+const byte min_Serial_servo_id[4] = {0, 2, 4, 6}; //各子艦のサーボのidの中で最小のものを書いた配列。最後の要素はservo_idの最大値+1(番兵)
 
 byte data = 0;//受信データ格納用
 
 void to_child(byte servo_id){ //母艦から子艦へのデータの送信
-  if (servo_id <= max_Serial_servo_id[0]) Serial1.write(servo_id);
-  else if (servo_id <= max_Serial_servo_id[1]) Serial2.write(servo_id-max_Serial_servo_id[0]-1);
-  else if (servo_id <= max_Serial_servo_id[2]) Serial3.write(servo_id-max_Serial_servo_id[1]-1);
-  else Serial.print("error");
+  if (servo_id >= min_Serial_servo_id[3]) Serial.print("error");
+  else if (servo_id >= min_Serial_servo_id[2]) Serial3.write(servo_id-min_Serial_servo_id[2]);
+  else if (servo_id >= min_Serial_servo_id[1]) Serial2.write(servo_id-min_Serial_servo_id[1]);
+  else Serial1.write(servo_id-min_Serial_servo_id[0]);
 }
 
 void to_pc(byte sensor_id, byte num){ //母艦からPCへのデータの送信
-  if (num == 0) Serial.write(sensor_id);
-  else Serial.write(sensor_id+max_Serial_servo_id[num-2]+1);
+  Serial.write(sensor_id+min_Serial_servo_id[num-1]);
 }
 
 
