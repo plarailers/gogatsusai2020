@@ -74,6 +74,6 @@ void loop(){
     }*/
   }
   for (int i = 0; i < num_sensor; i++){
-    CdS_process(sensorPin[i]); //CdSセンサーから車両の通過を検知した場合にはPCに送る
+    CdS_process(i); //CdSセンサーから車両の通過を検知した場合にはPCに送る
   }
 }
