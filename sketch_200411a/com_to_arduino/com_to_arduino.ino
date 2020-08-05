@@ -1,18 +1,19 @@
 //komabasai2019ブランチのarduino/stationのコードを改変して利用しています。
+//サーボ1、センサー２
 #include<VarSpeedServo.h>
 
 //サーボ関係の定数、変数
-const int num_servo = 2;//サーボの数(ポイントの数)
+const int num_servo = 1;//サーボの数(ポイントの数)
 
 VarSpeedServo servo[num_servo]; //各サーボを入れる配列
 
 const int servoSpeed = 50; //1から255。サーボを回転させる速さ。
 
-const int servo_angle_straight[num_servo] = {0, 0}; //サーボを直進にする際の角度。適宜いじってください
-const int servo_angle_curve[num_servo] = {130, 180}; //サーボを曲げる際の角度。適宜いじってください
+const int servo_angle_straight[num_servo] = {0}; //サーボを直進にする際の角度。適宜いじってください
+const int servo_angle_curve[num_servo] = {130}; //サーボを曲げる際の角度。適宜いじってください
 const bool straight = true;
 const bool curve = false;
-bool servo_status[num_servo] = {straight, straight}; //各サーボの状態を格納。初期値は適宜いじってください。
+bool servo_status[num_servo] = {straight}; //各サーボの状態を格納。初期値は適宜いじってください。
 
 byte data = 0;//受信データ格納用
 
@@ -28,8 +29,8 @@ void servo_change(byte servo_id) { //servoの向きを切り替える関数。�
 }
 
 //CdS関係の変数、定数
-const int num_sensor = 1; //CdSの個数
-const int sensorPin[num_sensor] = {A6}; //CdSセンサーの計測
+const int num_sensor = 2; //CdSの個数
+const int sensorPin[num_sensor] = {A4, A6}; //CdSセンサーの計測
 int cds[num_sensor][6] =  {};//差分制御用（マーカー）　番号が大きいほど最新
 double ave[num_sensor][4] = {};
 const int df = 4;
@@ -61,7 +62,7 @@ void CdS_process(int sensor_id){
 void setup(){
   Serial.begin(9600);
   servo[0].attach(13); //()の中適当にいじるべきかもしれない。
-  servo[1].attach(6);
+  //servo[1].attach(6);
 }
 
 void loop(){
