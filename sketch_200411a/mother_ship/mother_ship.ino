@@ -9,7 +9,7 @@ void to_child(byte servo_id){ //母艦から子艦へのデータの送信
   else Serial1.write(servo_id-min_Serial_servo_id[0]);
 }
 
-void to_pc(byte sensor_id, byte num){ //母艦からPCへのデータの
+void to_pc(byte sensor_id, byte num){ //母艦からPCへのデータの送信
   Serial.write(sensor_id+min_Serial_servo_id[num-1]);
 }
 
