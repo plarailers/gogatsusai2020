@@ -8,19 +8,20 @@ class State {
   //  ------この部分が線路形状と車両の配置を定義する----------
   State() {
     junctionList = new ArrayList<Junction>();
-    junctionList.add(new Junction(0));
-    junctionList.add(new Junction(1));
-    junctionList.add(new Junction(2));
-    junctionList.add(new Junction(3));
+    junctionList.add(new Junction(0, -1));
+    junctionList.add(new Junction(1, -1));
+    junctionList.add(new Junction(2, 0));
+    junctionList.add(new Junction(3, -1));
     sectionList = new ArrayList<Section>();
-    sectionList.add(new Section(0, 80, 3, 0));
-    sectionList.add(new Section(1, 200, 0, 1));
-    sectionList.add(new Section(2, 80, 1, 2));
-    sectionList.add(new Section(3, 80, 1, 2));
-    sectionList.add(new Section(4, 200, 2, 3));
+    sectionList.add(new Section(0, 108, 3, 0));
+    sectionList.add(new Section(1, 89, 0, 1));
+    sectionList.add(new Section(2, 108, 1, 2));
+    sectionList.add(new Section(3, 108, 1, 2));
+    sectionList.add(new Section(4, 89, 2, 3));
     // 場合によっては、着発番線に合わせてここにtoggleを挟む必要がある
     sensorList = new ArrayList<Sensor>();
-    sensorList.add(new Sensor(0, 1, 100));
+    sensorList.add(new Sensor(0, 1, 45));
+    sensorList.add(new Sensor(1, 4, 45));
     stationList = new ArrayList<Station>();
     stationList.add(new Station(0, "A"));  // A駅を追加
     stationList.add(new Station(1, "B"));  // B駅を追加
@@ -80,14 +81,16 @@ static class Junction {
   static ArrayList<Junction> all = new ArrayList<Junction>();
   
   int id;
+  int servoId;
   ArrayList<Section> inSectionList;
   ArrayList<Section> outSectionList;
   int inSectionIndex;
   int outSectionIndex;
   
-  Junction(int id) {
+  Junction(int id, int servoId) {
     all.add(this);
     this.id = id;
+    this.servoId = servoId;
     inSectionList = new ArrayList<Section>();
     outSectionList = new ArrayList<Section>();
     inSectionIndex = 0;

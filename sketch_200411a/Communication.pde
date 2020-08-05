@@ -27,11 +27,12 @@ class Communication {
     if (simulationMode) {
       simulationSpeedMap.put(0, 0);
       simulationSpeedMap.put(1, 0);
+      arduino = new Serial(parent, "COM8", 9600);
     } else {
       esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));  // Mac
       // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // Macテスト用
       // esp32Map.put(0, new Serial(parent, "COM8", 115200));  // Windows
-      arduino = new Serial(parent, "", 9600);
+
     }
     update();
   }
@@ -44,6 +45,9 @@ class Communication {
         if (speed > 0) {
           trainSignalBuffer.add(new TrainSignal(trainId, speed));
         }
+      }
+      while (arduino.available() > 0) {
+        sensorSignalBuffer.add(arduino.read());
       }
     } else {
       for (Map.Entry<Integer, Serial> entry : esp32Map.entrySet()) {
@@ -92,6 +96,7 @@ class Communication {
   // 指定したポイントに切替命令を送る。
   void sendToggle(int junctionId) {
     if (simulationMode) {
+      arduino.write(junctionId);
     } else {
       arduino.write(junctionId);
     }

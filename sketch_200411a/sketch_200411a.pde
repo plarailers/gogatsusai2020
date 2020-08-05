@@ -41,7 +41,9 @@ void draw() {
   for (Junction junction : state.junctionList) {
     if (junctionControl(junction)) {  // ポイントを切り替えるべきか判定
       junction.toggle();  // ポイントを切り替える
-      communication.sendToggle(junction.id);
+      if (junction.servoId > -1) {
+        communication.sendToggle(junction.servoId);
+      }
     }
   }
 
@@ -64,6 +66,7 @@ void draw() {
   
   while (communication.availableSensorSignal() > 0) {
     int sensorId = communication.receiveSensorSignal();
+    println(sensorId);
     positionAdjust(sensorId);
   }
   
