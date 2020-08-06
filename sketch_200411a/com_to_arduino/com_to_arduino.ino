@@ -3,7 +3,7 @@
 #include<VarSpeedServo.h>
 
 //サーボ関係の定数、変数
-const int num_servo = 1;//サーボの数(ポイントの数)
+const int num_servo = 2;//サーボの数(ポイントの数)
 
 VarSpeedServo servo[num_servo]; //各サーボを入れる配列
 
@@ -29,10 +29,10 @@ void servo_change(byte servo_id) { //servoの向きを切り替える関数。�
 }
 
 //CdS関係の変数、定数
-const int num_sensor = 2; //CdSの個数
-const int sensorPin[num_sensor] = {A4, A6}; //CdSセンサーの計測
-const int sensor_baseline[2] = {200, 200}; //CdSセンサーの読み取り値がこれを下回ったら通過と判定する。
-unsigned long before_passing_time[2] = {0, 0}; //前回通過した時の時間
+const int num_sensor = 1; //CdSの個数
+const int sensorPin[num_sensor] = {A0}; //CdSセンサーの計測
+const int sensor_baseline[num_sensor] = {200}; //CdSセンサーの読み取り値がこれを下回ったら通過と判定する。
+unsigned long before_passing_time[num_sensor] = {0}; //前回通過した時の時間
 unsigned long time; //現在の時間。millis()を受ける。
 unsigned long time_for_passing = 3000; //通過に要する時間。前回の通過判定からこの時間だけは通過判定がなされない。
 int value;
@@ -84,15 +84,15 @@ void setup(){
 }
 
 void loop(){
-  while(Serial.available() > 0){//シリアルで受け取った信号をもとにサーボを動かす
+  //サーボなしでテスト
+  /*while(Serial.available() > 0){//シリアルで受け取った信号をもとにサーボを動かす
     data = Serial.read();
     servo_change(data);
     /*for (int i = 0; i < num_sensor; i++){
       CdS_process(sensorPin[i]); //CdSセンサーからの情報をPCに送る。
-    }*/
-  }
+    }
+  }*/
   for (int i = 0; i < num_sensor; i++){
     CdS_process(i); //CdSセンサーから車両の通過を検知した場合にはPCに送る
   }
 }
-tx1, tx2
