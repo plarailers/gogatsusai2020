@@ -31,7 +31,7 @@ void servo_change(byte servo_id) { //servoの向きを切り替える関数。�
 //CdS関係の変数、定数
 const int num_sensor = 1; //CdSの個数
 const int sensorPin[num_sensor] = {A0}; //CdSセンサーの計測
-const int sensor_baseline[num_sensor] = {200}; //CdSセンサーの読み取り値がこれを下回ったら通過と判定する。
+int sensor_baseline[num_sensor] = {200}; //CdSセンサーの読み取り値がこれを下回ったら通過と判定する。起動時に決定する仕様に変更する必要あり。
 unsigned long before_passing_time[num_sensor] = {0}; //前回通過した時の時間
 unsigned long time; //現在の時間。millis()を受ける。
 unsigned long time_for_passing = 3000; //通過に要する時間。前回の通過判定からこの時間だけは通過判定がなされない。
@@ -80,7 +80,10 @@ void CdS_process(int sensor_id){
 void setup(){
   Serial.begin(9600);
   servo[0].attach(13); //()の中適当にいじるべきかもしれない。
-  //servo[1].attach(6);
+  for (int i = 0; i < num_sensor; i++) {
+    value = analogRead(sensorPin[i]);
+    sensor_baseline[i] = value/3; //理論上はvalue *= 8/35でいけると思いますが若干基準を緩くしてあります。状況に応じて調節。
+  }
 }
 
 void loop(){
