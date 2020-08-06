@@ -51,8 +51,8 @@ void CdS_process(int sensor_id){
   if (value < sensor_baseline[sensor_id]) { //基準を下回る明るさだったら通過と判定
     time = millis();
     if (before_passing_time[sensor_id] == 0 || time-before_passing_time[sensor_id] > time_for_passing){//一度も車両が通過していないか前回通過時から一定時間経っていれば通過と判定。
-      Serial.print(sensor_id);
-      Serial.write((byte)sensor_id); //上下どちらかいらないはず
+      //Serial.print(sensor_id); //シリアルモニタを見てデバッグ等したい時用
+      Serial.write((byte)sensor_id); //実際に使う用
       before_passing_time[sensor_id] = time;
     }
   }
