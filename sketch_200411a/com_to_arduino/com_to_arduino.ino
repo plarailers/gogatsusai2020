@@ -31,10 +31,10 @@ void servo_change(byte servo_id) { //servoの向きを切り替える関数。�
 //CdS関係の変数、定数
 const int num_sensor = 2; //CdSの個数
 const int sensorPin[num_sensor] = {A4, A6}; //CdSセンサーの計測
-const int sensor_baseline = {200, 200}; //CdSセンサーの読み取り値がこれを下回ったら通過と判定する。
-unsigned long before_passing_time = {0, 0}; //前回通過した時の時間
-unsigned long time; //現在の時間。mills()を受ける。
-unsigned long time_for_passing = 3000 //通過に要する時間。前回の通過判定からこの時間だけは通過判定がなされない。
+const int sensor_baseline[2] = {200, 200}; //CdSセンサーの読み取り値がこれを下回ったら通過と判定する。
+unsigned long before_passing_time[2] = {0, 0}; //前回通過した時の時間
+unsigned long time; //現在の時間。millis()を受ける。
+unsigned long time_for_passing = 3000; //通過に要する時間。前回の通過判定からこの時間だけは通過判定がなされない。
 int value;
 
 //以下のコメントアウトは差分検知バージョンで使っていたものです。
@@ -49,11 +49,11 @@ void CdS_process(int sensor_id){
 
   //絶対値バージョン
   if (value < sensor_baseline[sensor_id]) { //基準を下回る明るさだったら通過と判定
-    time = mills();
-    if (before_passing_time[sensor_id] == 0 || time-before_passing_time[sensor_id] > 3000) {//一度も車両が通過していないか前回通過時から一定時間経っていれば通過と判定。
+    time = millis();
+    if (before_passing_time[sensor_id] == 0 || time-before_passing_time[sensor_id] > 3000){//一度も車両が通過していないか前回通過時から一定時間経っていれば通過と判定。
       Serial.print(sensor_id);
       Serial.write((byte)sensor_id); //上下どちらかいらないはず
-      before_passing_time[sensor_id]　＝time;
+      before_passing_time[sensor_id] = time;
     }
   }
 
