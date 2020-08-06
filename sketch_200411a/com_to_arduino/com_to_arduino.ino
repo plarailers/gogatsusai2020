@@ -95,3 +95,4 @@ void loop(){
     CdS_process(i); //CdSセンサーから車両の通過を検知した場合にはPCに送る
   }
 }
+tx1, tx2
