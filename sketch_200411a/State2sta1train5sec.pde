@@ -1,3 +1,6 @@
+static final float STRAIGHT_UNIT = 21.5;
+static final float CURVE_UNIT = 16.9;
+
 // 2駅+1車両 テスト用
 class State {
   ArrayList<Junction> junctionList;
@@ -9,27 +12,27 @@ class State {
   State() {
     junctionList = new ArrayList<Junction>();
     junctionList.add(new Junction(0, -1));
-    junctionList.add(new Junction(1, -1));
+    junctionList.add(new Junction(1, 1));
     junctionList.add(new Junction(2, 0));
     junctionList.add(new Junction(3, -1));
     sectionList = new ArrayList<Section>();
-    sectionList.add(new Section(0, 108, 3, 0));
-    sectionList.add(new Section(1, 89, 0, 1));
-    sectionList.add(new Section(2, 108, 1, 2));
-    sectionList.add(new Section(3, 108, 1, 2));
-    sectionList.add(new Section(4, 89, 2, 3));
+    sectionList.add(new Section(0, (int)(STRAIGHT_UNIT * 4), 3, 0));
+    sectionList.add(new Section(1, (int)(STRAIGHT_UNIT + CURVE_UNIT * 4), 0, 1));
+    sectionList.add(new Section(2, (int)(STRAIGHT_UNIT * 4), 1, 2));
+    sectionList.add(new Section(3, (int)(STRAIGHT_UNIT * 4), 1, 2));
+    sectionList.add(new Section(4, (int)(STRAIGHT_UNIT + CURVE_UNIT * 4), 2, 3));
     // 場合によっては、着発番線に合わせてここにtoggleを挟む必要がある
     sensorList = new ArrayList<Sensor>();
-    sensorList.add(new Sensor(0, 1, 45));
-    sensorList.add(new Sensor(1, 4, 45));
+    sensorList.add(new Sensor(0, 1, (int)(STRAIGHT_UNIT * 0.5 + CURVE_UNIT * 2)));
+    sensorList.add(new Sensor(1, 4, (int)(STRAIGHT_UNIT * 0.5 + CURVE_UNIT * 2)));
     stationList = new ArrayList<Station>();
     stationList.add(new Station(0, "A"));  // A駅を追加
     stationList.add(new Station(1, "B"));  // B駅を追加
-    Station.getById(0).setTrack(1, 0, 70);  // 駅0の1番線はSection0
-    Station.getById(1).setTrack(1, 2, 70);  // 駅1の1番線はsection2
-    Station.getById(1).setTrack(2, 3, 70);  // 駅1の2番線はsection3
+    Station.getById(0).setTrack(1, 0, (int)(STRAIGHT_UNIT * 3));  // 駅0の1番線はSection0
+    Station.getById(1).setTrack(1, 2, (int)(STRAIGHT_UNIT * 3));  // 駅1の1番線はsection2
+    Station.getById(1).setTrack(2, 3, (int)(STRAIGHT_UNIT * 3));  // 駅1の2番線はsection3
     trainList = new ArrayList<Train>();
-    trainList.add(new Train(Station.getById(0).trackList.get(1), 70));  // 駅0の1番線に配置
+    trainList.add(new Train(Station.getById(0).trackList.get(1), (int)(STRAIGHT_UNIT * 3)));  // 駅0の1番線に配置
     // --------------------------------------------
   }
 }
