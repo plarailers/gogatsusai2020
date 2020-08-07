@@ -7,13 +7,13 @@ const int num_servo = 2;//サーボの数(ポイントの数)
 
 VarSpeedServo servo[num_servo]; //各サーボを入れる配列
 
-const int servoSpeed = 5; //1から255。サーボを回転させる速さ。これを大きくすると、サーボ稼働時にセンサ入力が送られてしまう
+const int servoSpeed = 100; //1から255。サーボを回転させる速さ。これを大きくすると、サーボ稼働時にセンサ入力が送られてしまう
 
-const int servo_angle_straight[num_servo] = {0}; //サーボを直進にする際の角度。適宜いじってください
-const int servo_angle_curve[num_servo] = {130}; //サーボを曲げる際の角度。適宜いじってください
+const int servo_angle_straight[num_servo] = {0, 90}; //サーボを直進にする際の角度。適宜いじってください
+const int servo_angle_curve[num_servo] = {130, 150}; //サーボを曲げる際の角度。適宜いじってください
 const bool straight = true;
 const bool curve = false;
-bool servo_status[num_servo] = {straight}; //各サーボの状態を格納。初期値は適宜いじってください。
+bool servo_status[num_servo] = {straight, straight}; //各サーボの状態を格納。初期値は適宜いじってください。
 
 byte data = 0;//受信データ格納用
 
@@ -80,6 +80,7 @@ void CdS_process(int sensor_id){
 void setup(){
   Serial.begin(9600);
   servo[0].attach(13); //()の中適当にいじるべきかもしれない。
+  servo[1].attach(3); //()の中適当にいじるべきかもしれない。
   for (int i = 0; i < num_sensor; i++) {
     value = analogRead(sensorPin[i]);
     sensor_baseline[i] = value/3; //理論上はvalue *= 8/35でいけると思いますが若干基準を緩くしてあります。状況に応じて調節。
@@ -88,13 +89,13 @@ void setup(){
 
 void loop(){
   //サーボなしでテスト
-  /*while(Serial.available() > 0){//シリアルで受け取った信号をもとにサーボを動かす
+  while(Serial.available() > 0){//シリアルで受け取った信号をもとにサーボを動かす
     data = Serial.read();
     servo_change(data);
     /*for (int i = 0; i < num_sensor; i++){
-      CdS_process(sensorPin[i]); //CdSセンサーからの情報をPCに送る。
-    }
-  }*/
+      CdS_process(i); //CdSセンサーからの情報をPCに送る。
+    }*/
+  }
   for (int i = 0; i < num_sensor; i++){
     CdS_process(i); //CdSセンサーから車両の通過を検知した場合にはPCに送る
   }

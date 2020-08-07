@@ -1,4 +1,5 @@
-const byte min_Serial_servo_id[3] = {0, 1, 2}; //各子艦のサーボのidの中で最小のものを書いた配列。最後の要素はservo_idの最大値+1(番兵)
+const byte min_Serial_servo_id[3] = {0, 0, 1}; //各子艦のサーボのidの中で最小のものを書いた配列。最後の要素はservo_idの最大値+1(番兵)
+const byte min_Serial_sensor_id[3] = {0, 1, 2}; //各子艦のセンサーのidの中で最小のものを書いた配列。最後の要素はsensor_idの最大値+1(番兵)
 
 byte data = 0;//受信データ格納用
 
@@ -10,7 +11,7 @@ void to_child(byte servo_id){ //母艦から子艦へのデータの送信
 }
 
 void to_pc(byte sensor_id, byte num){ //母艦からPCへのデータの送信
-  Serial.write((byte)(sensor_id+min_Serial_servo_id[num-1]));
+  Serial.write((byte)(sensor_id+min_Serial_sensor_id[num-1]));
 }
 
 
