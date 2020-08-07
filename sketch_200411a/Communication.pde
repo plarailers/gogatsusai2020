@@ -32,7 +32,7 @@ class Communication {
       esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));  // Mac
       // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // Macテスト用
       // esp32Map.put(0, new Serial(parent, "COM8", 115200));  // Windows
-
+      arduino = new Serial(parent, "COM8", 9600);
     }
     update();
   }
