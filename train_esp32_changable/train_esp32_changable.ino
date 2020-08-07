@@ -48,6 +48,7 @@ void move(double *speed_id) {//引数のspeed_idは速度目標値
     old_time = new_time;
     //PCに1回転ごとに信号を送る
     //SerialBT.println('o');
+    SerialBT.write((byte)(2*3.1415926535*r));
 
     //周期periodを速度speedに変換
     speed = 2000*3.1415926535*r/(double)period;
