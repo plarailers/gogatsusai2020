@@ -14,9 +14,9 @@ int input_min = 25;
 double speed_id = 50;//車両の速度目標値(cm/s)
 double speed_max = 100;
 double speed_min = 5;
-double kp = 0.7;//比例係数
-double kd = 1;//微分係数
-double ki = 0.01;//積分係数
+double kp = 0.5;//比例係数
+double kd = 4;//微分係数
+double ki = 0.1;//積分係数
 /*------------------------------------------*/
 
 double v; //charからdoubleに変更したの注意。
@@ -86,8 +86,8 @@ void stop() {
 }
 
 void start() {// 発車
-  ledcWrite(0,240);
-  delay(1000);
+  ledcWrite(0,64);
+  delay(200);
 }
 
 
@@ -140,7 +140,7 @@ void loop(){
       status = 0;
     }
     else if (status == 0) { //現在停車中ならstartさせてからmove(v)する
-      //start();  //start関数が不調？
+      start();  //start関数が不調？
       status = 1;
     }
   }
