@@ -14,7 +14,7 @@ void setup() {
   display = new Display();
   display.setup();
   communication = new Communication(this);
-  communication.simulationMode = true;
+  communication.simulationMode = false;
   communication.setup();
   while (communication.availableTrainSignal() > 0) {  // 各列車について行う
     TrainSignal trainSignal = communication.receiveTrainSignal();  // 列車id取得
@@ -54,6 +54,7 @@ void draw() {
     int delta = trainSignal.delta;
     Train train = state.trainList.get(id);
     MoveResult moveResult = train.move(delta);
+    println("train"+id+" delta="+delta);
     timetableUpdate(train, moveResult);
   }
   
@@ -74,10 +75,10 @@ void draw() {
   display.draw(state);
   
   try{  // 一定時間待つ
-    Thread.sleep(500);
+    Thread.sleep(200);
   } catch(InterruptedException ex){
     ex.printStackTrace();
   }
-  time += 500;
+  time += 200;
     
 }
