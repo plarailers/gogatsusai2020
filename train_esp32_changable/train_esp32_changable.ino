@@ -30,7 +30,7 @@ bool status = 0;//車両の状態。1:進行、0:停止
 unsigned int new_time = 0;//速度の偏差を取る際に使う。
 unsigned int old_time = 0;//速度の偏差を取る際に使う。
 int period = 0;//回転周期(s)
-double r = 1.25;//車輪の半径(cm)
+double r = 1.4;//車輪の半径(cm)
 double e0;//現在の偏差
 double e1;//1つ前の偏差
 double e2;//2つ前の偏差
@@ -88,7 +88,7 @@ void stop() {
 
 void start() {// 発車
   ledcWrite(0,64);
-  delay(200);
+  delay(100);
 }
 
 
@@ -135,7 +135,7 @@ void loop(){
 
   if (SerialBT.available()>0) {
     v = SerialBT.read();
-    SerialBT.write(v);  //デバッグ用（来たやつ返す）
+    // SerialBT.write(v);  デバッグ用（来たやつ返す）: 自動運転時はOFF
     if (v == 0) { //送られてきた速度が0なら止める。
       stop();
       status = 0;
