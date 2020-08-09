@@ -16,15 +16,15 @@ class State {
     junctionList.add(new Junction(2, 0));
     junctionList.add(new Junction(3, -1));
     sectionList = new ArrayList<Section>();
-    sectionList.add(new Section(0, (int)(STRAIGHT_UNIT * 4), 3, 0));
-    sectionList.add(new Section(1, (int)(STRAIGHT_UNIT * 3 + CURVE_UNIT * 4), 0, 1));
-    sectionList.add(new Section(2, (int)(STRAIGHT_UNIT * 4), 1, 2));
-    sectionList.add(new Section(3, (int)(STRAIGHT_UNIT * 4), 1, 2));
-    sectionList.add(new Section(4, (int)(STRAIGHT_UNIT + CURVE_UNIT * 4), 2, 3));
+    sectionList.add(new Section(0, (int)(STRAIGHT_UNIT * 5.5), 3, 0));
+    sectionList.add(new Section(1, (int)(STRAIGHT_UNIT * 5 + CURVE_UNIT * 4), 0, 1));
+    sectionList.add(new Section(2, (int)(STRAIGHT_UNIT * 5.5), 1, 2));
+    sectionList.add(new Section(3, (int)(STRAIGHT_UNIT * 5.5), 1, 2));
+    sectionList.add(new Section(4, (int)(STRAIGHT_UNIT * 3 + CURVE_UNIT * 4), 2, 3));
     // 場合によっては、着発番線に合わせてここにtoggleを挟む必要がある
     sensorList = new ArrayList<Sensor>();
-    sensorList.add(new Sensor(0, 1, (int)(STRAIGHT_UNIT * 1.5 + CURVE_UNIT * 2)));
-    sensorList.add(new Sensor(1, 4, (int)(STRAIGHT_UNIT * 0.5 + CURVE_UNIT * 2)));
+    sensorList.add(new Sensor(0, 1, (int)(STRAIGHT_UNIT * 2.5 + CURVE_UNIT * 2)));
+    sensorList.add(new Sensor(1, 4, (int)(STRAIGHT_UNIT * 1.5 + CURVE_UNIT * 2)));
     stationList = new ArrayList<Station>();
     stationList.add(new Station(0, "A"));  // A駅を追加
     stationList.add(new Station(1, "B"));  // B駅を追加
