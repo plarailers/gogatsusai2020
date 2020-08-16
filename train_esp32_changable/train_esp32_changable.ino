@@ -14,8 +14,8 @@ int input_min = 25;
 double speed_id = 50;//車両の速度目標値(cm/s)
 double speed_max = 100;
 double speed_min = 5;
-double kp = 0.5;//比例係数
-double kd = 4;//微分係数
+double kp = 0.7;//比例係数
+double kd = 3;//微分係数
 double ki = 0.1;//積分係数
 /*------------------------------------------*/
 
@@ -43,6 +43,7 @@ void move(double *speed_id) {//引数のspeed_idは速度目標値
   //磁石がホールセンサーの上にきたら
   if (hole == 0 && value == 1) {
     hole = 1;//value==1をhole==1と言い換えている。(必要ない??)
+    new_time = millis();
     period = new_time - old_time;//一回転の周期を計測
     old_time = new_time;
     //PCに1回転ごとに信号を送る
@@ -63,13 +64,12 @@ void move(double *speed_id) {//引数のspeed_idは速度目標値
     else if (input < input_min) {//inputの下限はinput_min
       input = input_min;
     }
+    ledcWrite(0, input);//モータにinputの入力のpwm入力を行う。
   }
   //磁石がホールセンサから離れたら
   else if (hole == 1 && value==0) {
     hole = 0;
   }
-
-  ledcWrite(0, input);//モータにinputの入力のpwm入力を行う。
   
   //シリアル通信の量が多いとホールセンサの読み取りが不確かになるので消している。
   /*SerialBT.print(hole);
@@ -88,8 +88,26 @@ void stop() {
 }
 
 void start() {// 発車
-  ledcWrite(0,200);
-  delay(300);
+  int starttime = millis();  //startした時刻
+  e0 = 0;  e1 = 0;  e2 = 0;  // 初期化
+  int time_from_start = 0;
+  int input = 0;
+  bool starthole = digitalRead(SENSOR_PIN);  //start時のhole (0 or 1)
+  bool startmode = 1;
+  while (startmode == 1) {
+    time_from_start = millis() - starttime;
+    input = time_from_start / 2;
+    if (input > 160) {
+      input = 160;
+    }
+    ledcWrite(0, input);
+    
+    if (digitalRead(SENSOR_PIN) == 0) {
+      starthole = 0;
+    } else if (starthole == 0) { 
+      startmode = 0;
+    }
+  }
 }
 
 
@@ -111,7 +129,7 @@ void brake(double *speed_id) {
 
 /*---------------------------------------------*/
 void setup() {
-  SerialBT.begin("ESP32-N700");//Bluetooth通信を開始する。
+  SerialBT.begin("ESP32");//Bluetooth通信を開始する。
   ledcSetup(0, 12800, 8);//pwmでモータを制御する際に必要。
   ledcAttachPin(INPUT_PIN, 0);
   Serial.begin(9600);//観測用
@@ -131,7 +149,6 @@ void loop(){
   Serial.print(" ");
   Serial.println(input);
 
-  new_time = millis();
   // SerialBT.write('a');//通信テスト用
 
   if (SerialBT.available()>0) {
@@ -142,7 +159,7 @@ void loop(){
       status = 0;
     }
     else if (status == 0) { //現在停車中ならstartさせてからmove(v)する
-      start();  //start関数が不調？
+      start();
       status = 1;
     }
   }
