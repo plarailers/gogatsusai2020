@@ -8,7 +8,7 @@
 BluetoothSerial SerialBT;
 
 /*調整する変数--------------------------------*/
-int input = 80;//モーターへの入力(0~255)
+int input = 100;//モーターへの入力(0~255)
 int input_max = 255;
 int input_min = 25;
 double speed_id = 50;//車両の速度目標値(cm/s)
@@ -38,7 +38,6 @@ double e2;//2つ前の偏差
 /*-------------------------------------------*/
 //進行中(status==1)に繰り返す
 void move(double *speed_id) {//引数のspeed_idは速度目標値
-  ledcWrite(0, input);//モータにinputの入力のpwm入力を行う。
   value = digitalRead(SENSOR_PIN);//ホールセンサの値を読む。磁石の上にあると1になる。
 
   //磁石がホールセンサーの上にきたら
@@ -70,6 +69,8 @@ void move(double *speed_id) {//引数のspeed_idは速度目標値
     hole = 0;
   }
 
+  ledcWrite(0, input);//モータにinputの入力のpwm入力を行う。
+  
   //シリアル通信の量が多いとホールセンサの読み取りが不確かになるので消している。
   /*SerialBT.print(hole);
   SerialBT.print(" ");
@@ -87,8 +88,8 @@ void stop() {
 }
 
 void start() {// 発車
-  ledcWrite(0,64);
-  delay(100);
+  ledcWrite(0,200);
+  delay(300);
 }
 
 
@@ -110,7 +111,7 @@ void brake(double *speed_id) {
 
 /*---------------------------------------------*/
 void setup() {
-  SerialBT.begin("ESP32");//Bluetooth通信を開始する。
+  SerialBT.begin("ESP32-N700");//Bluetooth通信を開始する。
   ledcSetup(0, 12800, 8);//pwmでモータを制御する際に必要。
   ledcAttachPin(INPUT_PIN, 0);
   Serial.begin(9600);//観測用
