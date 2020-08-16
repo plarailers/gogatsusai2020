@@ -35,6 +35,7 @@ void draw() {
     // MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed);  // 適当な距離進ませる
     // timetableUpdate(train, moveResult);  // 時刻表を更新する
     communication.sendSpeed(train.id, targetSpeed);
+    println(time + " SEND train=" + train.id + ", speed=" + targetSpeed);
   }
 
   // 各ポイントについて行う
@@ -54,7 +55,7 @@ void draw() {
     int delta = trainSignal.delta;
     Train train = state.trainList.get(id);
     MoveResult moveResult = train.move(delta);
-    println("train"+id+" delta="+delta);
+    println(time + " RECEIVE train=" + id + ", delta=" + delta);
     timetableUpdate(train, moveResult);
   }
   
@@ -67,7 +68,7 @@ void draw() {
   
   while (communication.availableSensorSignal() > 0) {
     int sensorId = communication.receiveSensorSignal();
-    println(sensorId);
+    println(time + " RECEIVE sensor=" + sensorId);
     positionAdjust(sensorId);
   }
   

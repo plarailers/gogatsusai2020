@@ -29,7 +29,7 @@ class Communication {
       simulationSpeedMap.put(1, 0);
       arduino = new Serial(parent, "COM8", 9600);
     } else {
-       esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));  // Mac
+      esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));  // Mac
       // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // Macテスト用
       arduino = new Serial(parent, "/dev/tty.usbmodem14301", 9600); // Mac
       // esp32Map.put(0, new Serial(parent, "COM5", 115200));  // Windows
@@ -90,7 +90,6 @@ class Communication {
       Serial esp32 = esp32Map.get(trainId);
       if (esp32 != null) {
         esp32.write(speed);
-        println(speed);
       }
     }
   }
