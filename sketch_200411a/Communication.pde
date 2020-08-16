@@ -47,8 +47,10 @@ class Communication {
           trainSignalBuffer.add(new TrainSignal(trainId, speed));
         }
       }
-      while (arduino.available() > 0) {
-        sensorSignalBuffer.add(arduino.read());
+      if (arduino != null) {
+        while (arduino.available() > 0) {
+          sensorSignalBuffer.add(arduino.read());
+        }
       }
     } else {
       for (Map.Entry<Integer, Serial> entry : esp32Map.entrySet()) {
@@ -60,8 +62,10 @@ class Communication {
           }
         }
       }
-      while (arduino.available() > 0) {
-        sensorSignalBuffer.add(arduino.read());
+      if (arduino != null) {
+        while (arduino.available() > 0) {
+          sensorSignalBuffer.add(arduino.read());
+        }
       }
     }
   }
@@ -95,11 +99,21 @@ class Communication {
   }
   
   // 指定したポイントに切替命令を送る。
-  void sendToggle(int junctionId) {
-    if (simulationMode) {
+  void sendToggle(int junctionId, ServoState servoState) {
+    if (arduino != null) {
+      int servoStateCode = 0;
+      switch (servoState) {
+        case NoServo:
+          return;
+        case Straight:
+          servoStateCode = 0;
+          break;
+        case Curve:
+          servoStateCode = 1;
+          break;
+      }
       arduino.write(junctionId);
-    } else {
-      arduino.write(junctionId);
+      arduino.write(servoStateCode);
     }
   }
 }

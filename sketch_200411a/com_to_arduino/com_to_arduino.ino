@@ -11,20 +11,20 @@ const int servoSpeed = 100; //1から255。サーボを回転させる速さ。�
 
 const int servo_angle_straight[num_servo] = {0, 90}; //サーボを直進にする際の角度。適宜いじってください
 const int servo_angle_curve[num_servo] = {130, 145}; //サーボを曲げる際の角度。適宜いじってください
-const bool straight = true;
-const bool curve = false;
-bool servo_status[num_servo] = {straight, straight}; //各サーボの状態を格納。初期値は適宜いじってください。
+const byte straight = 0;
+const byte curve = 1;
+byte servo_status[num_servo] = {straight, straight}; //各サーボの状態を格納。初期値は適宜いじってください。
 
 byte data = 0;//受信データ格納用
 
-void servo_change(byte servo_id) { //servoの向きを切り替える関数。引数は変えたいサーボのid
-  if (servo_status[servo_id] == straight) {
-    servo[servo_id].write(servo_angle_curve[servo_id], servoSpeed, true);
-    servo_status[servo_id] = curve;
-  }
-  else {
+void servo_change(byte servo_id, byte servo_state) { //servoの向きを切り替える関数。引数は変えたいサーボのidと向き
+  if (servo_state == straight) {
     servo[servo_id].write(servo_angle_straight[servo_id], servoSpeed, true);
     servo_status[servo_id] = straight;
+  }
+  else {
+    servo[servo_id].write(servo_angle_curve[servo_id], servoSpeed, true);
+    servo_status[servo_id] = curve;
   }
 }
 
@@ -93,9 +93,10 @@ void setup(){
 
 void loop(){
   //サーボなしでテスト
-  while(Serial.available() > 0){//シリアルで受け取った信号をもとにサーボを動かす
-    data = Serial.read();
-    servo_change(data);
+  while(Serial.available() >= 2){//シリアルで受け取った信号をもとにサーボを動かす
+    byte servo_id = Serial.read();
+    byte servo_state = Serial.read();
+    servo_change(servo_id, servo_state);
     /*for (int i = 0; i < num_sensor; i++){
       CdS_process(i); //CdSセンサーからの情報をPCに送る。
     }*/

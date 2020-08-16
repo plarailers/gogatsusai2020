@@ -43,7 +43,8 @@ void draw() {
     if (junctionControl(junction)) {  // ポイントを切り替えるべきか判定
       ServoState toggleResult = junction.toggle();  // ポイントを切り替える
       if (junction.servoId > -1 && toggleResult != ServoState.NoServo) {
-        communication.sendToggle(junction.servoId);
+        communication.sendToggle(junction.servoId, toggleResult);
+        println(time + " SEND servo=" + junction.servoId + ", toggle=" + toggleResult);
       }
     }
   }
