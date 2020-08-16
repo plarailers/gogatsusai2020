@@ -24,16 +24,30 @@ class Communication {
   }
   
   void setup() {
+    String osName = System.getProperty("os.name");
+    boolean isMac = osName.startsWith("Mac");
+    boolean isWindows = osName.startsWith("Windows");
     if (simulationMode) {
-      simulationSpeedMap.put(0, 0);
-      simulationSpeedMap.put(1, 0);
-      arduino = new Serial(parent, "COM8", 9600);
+      if (isMac) {
+        simulationSpeedMap.put(0, 0);
+        simulationSpeedMap.put(1, 0);
+        arduino = new Serial(parent, "/dev/tty.usbmodem14301", 9600);
+      }
+      if (isWindows) {
+        simulationSpeedMap.put(0, 0);
+        simulationSpeedMap.put(1, 0);
+        arduino = new Serial(parent, "COM8", 9600);
+      }
     } else {
-       esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));  // Mac
-      // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // Macテスト用
-      arduino = new Serial(parent, "/dev/tty.usbmodem14301", 9600); // Mac
-      // esp32Map.put(0, new Serial(parent, "COM5", 115200));  // Windows
-      // arduino = new Serial(parent, "COM8", 9600); // Windows
+      if (isMac) {
+        esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));
+        // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // テスト用
+        arduino = new Serial(parent, "/dev/tty.usbmodem14301", 9600);
+      }
+      if (isWindows) {
+        esp32Map.put(0, new Serial(parent, "COM5", 115200));
+        arduino = new Serial(parent, "COM8", 9600);
+      }
     }
     update();
   }
@@ -47,8 +61,10 @@ class Communication {
           trainSignalBuffer.add(new TrainSignal(trainId, speed));
         }
       }
-      while (arduino.available() > 0) {
-        sensorSignalBuffer.add(arduino.read());
+      if (arduino != null) {
+        while (arduino.available() > 0) {
+          sensorSignalBuffer.add(arduino.read());
+        }
       }
     } else {
       for (Map.Entry<Integer, Serial> entry : esp32Map.entrySet()) {
@@ -60,8 +76,10 @@ class Communication {
           }
         }
       }
-      while (arduino.available() > 0) {
-        sensorSignalBuffer.add(arduino.read());
+      if (arduino != null) {
+        while (arduino.available() > 0) {
+          sensorSignalBuffer.add(arduino.read());
+        }
       }
     }
   }
@@ -90,17 +108,26 @@ class Communication {
       Serial esp32 = esp32Map.get(trainId);
       if (esp32 != null) {
         esp32.write(speed);
-        println(speed);
       }
     }
   }
   
   // 指定したポイントに切替命令を送る。
-  void sendToggle(int junctionId) {
-    if (simulationMode) {
+  void sendToggle(int junctionId, ServoState servoState) {
+    if (arduino != null) {
+      int servoStateCode = 0;
+      switch (servoState) {
+        case NoServo:
+          return;
+        case Straight:
+          servoStateCode = 0;
+          break;
+        case Curve:
+          servoStateCode = 1;
+          break;
+      }
       arduino.write(junctionId);
-    } else {
-      arduino.write(junctionId);
+      arduino.write(servoStateCode);
     }
   }
 }

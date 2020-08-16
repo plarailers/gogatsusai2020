@@ -35,14 +35,16 @@ void draw() {
     // MoveResult moveResult = state.trainList.get(train.id).move(targetSpeed);  // 適当な距離進ませる
     // timetableUpdate(train, moveResult);  // 時刻表を更新する
     communication.sendSpeed(train.id, targetSpeed);
+    println(time + " SEND train=" + train.id + ", speed=" + targetSpeed);
   }
 
   // 各ポイントについて行う
   for (Junction junction : state.junctionList) {
     if (junctionControl(junction)) {  // ポイントを切り替えるべきか判定
-      junction.toggle();  // ポイントを切り替える
-      if (junction.servoId > -1) {
-        communication.sendToggle(junction.servoId);
+      ServoState toggleResult = junction.toggle();  // ポイントを切り替える
+      if (junction.servoId > -1 && toggleResult != ServoState.NoServo) {
+        communication.sendToggle(junction.servoId, toggleResult);
+        println(time + " SEND servo=" + junction.servoId + ", toggle=" + toggleResult);
       }
     }
   }
@@ -54,7 +56,7 @@ void draw() {
     int delta = trainSignal.delta;
     Train train = state.trainList.get(id);
     MoveResult moveResult = train.move(delta);
-    println("train"+id+" delta="+delta);
+    println(time + " RECEIVE train=" + id + ", delta=" + delta);
     timetableUpdate(train, moveResult);
   }
   
@@ -67,7 +69,7 @@ void draw() {
   
   while (communication.availableSensorSignal() > 0) {
     int sensorId = communication.receiveSensorSignal();
-    println(sensorId);
+    println(time + " RECEIVE sensor=" + sensorId);
     positionAdjust(sensorId);
   }
   
