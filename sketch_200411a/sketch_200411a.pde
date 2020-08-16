@@ -41,8 +41,8 @@ void draw() {
   // 各ポイントについて行う
   for (Junction junction : state.junctionList) {
     if (junctionControl(junction)) {  // ポイントを切り替えるべきか判定
-      junction.toggle();  // ポイントを切り替える
-      if (junction.servoId > -1) {
+      ServoState toggleResult = junction.toggle();  // ポイントを切り替える
+      if (junction.servoId > -1 && toggleResult != ServoState.NoServo) {
         communication.sendToggle(junction.servoId);
       }
     }
