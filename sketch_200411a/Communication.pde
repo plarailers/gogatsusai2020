@@ -24,16 +24,30 @@ class Communication {
   }
   
   void setup() {
+    String osName = System.getProperty("os.name");
+    boolean isMac = osName.startsWith("Mac");
+    boolean isWindows = osName.startsWith("Windows");
     if (simulationMode) {
-      simulationSpeedMap.put(0, 0);
-      simulationSpeedMap.put(1, 0);
-      arduino = new Serial(parent, "COM8", 9600);
+      if (isMac) {
+        simulationSpeedMap.put(0, 0);
+        simulationSpeedMap.put(1, 0);
+        arduino = new Serial(parent, "/dev/tty.usbmodem14301", 9600);
+      }
+      if (isWindows) {
+        simulationSpeedMap.put(0, 0);
+        simulationSpeedMap.put(1, 0);
+        arduino = new Serial(parent, "COM8", 9600);
+      }
     } else {
-      esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));  // Mac
-      // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // Macテスト用
-      arduino = new Serial(parent, "/dev/tty.usbmodem14301", 9600); // Mac
-      // esp32Map.put(0, new Serial(parent, "COM5", 115200));  // Windows
-      // arduino = new Serial(parent, "COM8", 9600); // Windows
+      if (isMac) {
+        esp32Map.put(0, new Serial(parent, "/dev/cu.ESP32-ESP32SPP", 115200));
+        // esp32Map.put(0, new Serial(parent, "/dev/cu.Bluetooth-Incoming-Port", 115200));  // テスト用
+        arduino = new Serial(parent, "/dev/tty.usbmodem14301", 9600);
+      }
+      if (isWindows) {
+        esp32Map.put(0, new Serial(parent, "COM5", 115200));
+        arduino = new Serial(parent, "COM8", 9600);
+      }
     }
     update();
   }
