@@ -56,7 +56,13 @@
   document.getElementById('speed').addEventListener('input', function(){
     if (isTimerOn == false) {
       timer = setTimeout(function(){
-        speed = document.getElementById('speed').value;
+        speed = parseInt(document.getElementById('speed').value);
+        // スピードの調整
+        if (speed < 0.149*255) {
+          speed = 0
+        } else {
+          speed = parseInt(20 + (speed - 0.149*255) / 7)  // min:20+0=20  max:20+217/7=51
+        }
         ws.send(JSON.stringify({"password": pw, "speed": speed}));
         console.log(speed);
         isTimerOn = false;
