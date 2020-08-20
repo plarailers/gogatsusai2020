@@ -10,10 +10,17 @@ String getTime() {
 
 void setup() {
   surface.setVisible(false);
+  String osName = System.getProperty("os.name");
+  boolean isMac = osName.startsWith("Mac");
+  boolean isWindows = osName.startsWith("Windows");
   //Bluetoothのシリアルを選択
-  //myPort = new Serial(this, "/dev/cu.ESP32-ESP32SPP", 115200);//Mac
-  //myPort = new Serial(this, "/dev/cu.Bluetooth-Incoming-Port", 115200);//Macテスト用
-  myPort = new Serial(this, "COM5", 115200);//Windows
+  if (isMac) {
+    myPort = new Serial(this, "/dev/cu.ESP32-ESP32SPP", 115200);//Mac
+    //myPort = new Serial(this, "/dev/cu.Bluetooth-Incoming-Port", 115200);//Macテスト用
+  }
+  if (isWindows) {
+    myPort = new Serial(this, "COM5", 115200);//Windows
+  }
   println(getTime(), "Bluetooth connected");
   wsc = new WebsocketClient(this, "wss://60jt3xl73m.execute-api.ap-northeast-1.amazonaws.com/dev");
   println(getTime(), "WebSocket connected");
