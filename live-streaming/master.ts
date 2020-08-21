@@ -5,12 +5,10 @@ import { SignalingClient, Role } from 'amazon-kinesis-video-streams-webrtc';
 interface FormValues {
     region: string;
     channelName: string;
-    clientId: string;
     sendVideo: boolean;
     sendAudio: boolean;
     openDataChannel: boolean;
     widescreen: boolean;
-    fullscreen: boolean;
     useTrickleICE: boolean;
     natTraversalDisabled: boolean;
     forceTURN: boolean;
@@ -22,17 +20,14 @@ interface FormValues {
 
 class Master {
     localView: HTMLVideoElement;
-    remoteView: HTMLVideoElement;
     signalingClient: SignalingClient;
     peerConnectionByClientId: { [K: string]: RTCPeerConnection };
     dataChannelByClientId: { [K: string]: RTCDataChannel };
     peerConnectionStatsInterval: NodeJS.Timeout;
     localStream: MediaStream;
-    remoteStreams: MediaStream[];
 
-    async start(localView: HTMLVideoElement, remoteView: HTMLVideoElement, formValues: FormValues, onStatsReport, onRemoteDataMessage) {
+    async start(localView: HTMLVideoElement, formValues: FormValues, onStatsReport, onRemoteDataMessage) {
         this.localView = localView;
-        this.remoteView = remoteView;
 
         // Create KVS client
         const kinesisVideoClient = new KinesisVideo({
@@ -179,15 +174,6 @@ class Master {
                 }
             });
 
-            // As remote tracks are received, add them to the remote view
-            peerConnection.addEventListener('track', event => {
-                console.log('[MASTER] Received remote track from client: ' + remoteClientId);
-                if (remoteView.srcObject) {
-                    return;
-                }
-                remoteView.srcObject = event.streams[0];
-            });
-
             // If there's no video/audio, this.localStream will be null. So, we should skip adding the tracks from it.
             if (this.localStream) {
                 this.localStream.getTracks().forEach(track => peerConnection.addTrack(track, this.localStream));
@@ -248,9 +234,6 @@ class Master {
             this.localStream = null;
         }
 
-        this.remoteStreams.forEach(remoteStream => remoteStream.getTracks().forEach(track => track.stop()));
-        this.remoteStreams = [];
-
         if (this.peerConnectionStatsInterval) {
             clearInterval(this.peerConnectionStatsInterval);
             this.peerConnectionStatsInterval = null;
@@ -260,16 +243,12 @@ class Master {
             this.localView.srcObject = null;
         }
 
-        if (this.remoteView) {
-            this.remoteView.srcObject = null;
-        }
-
         if (this.dataChannelByClientId) {
             this.dataChannelByClientId = {};
         }
     }
 
-    sendMessage(message) {
+    sendMessage(message: string) {
         Object.keys(this.dataChannelByClientId).forEach(clientId => {
             try {
                 this.dataChannelByClientId[clientId].send(message);
