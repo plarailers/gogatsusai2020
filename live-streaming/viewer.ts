@@ -18,21 +18,18 @@ interface FormValues {
 
 class Viewer {
     clientId: string;
-    localView: HTMLVideoElement;
     remoteView: HTMLVideoElement;
     signalingClient: SignalingClient;
     peerConnection: RTCPeerConnection;
     dataChannel: RTCDataChannel;
     peerConnectionStatsInterval: NodeJS.Timeout;
-    localStream: MediaStream;
     remoteStream: MediaStream;
 
     constructor() {
         this.clientId = uuidv4();
     }
 
-    async start(localView: HTMLVideoElement, remoteView: HTMLVideoElement, formValues: FormValues, onStatsReport, onRemoteDataMessage) {
-        this.localView = localView;
+    async start(remoteView: HTMLVideoElement, formValues: FormValues, onStatsReport, onRemoteDataMessage) {
         this.remoteView = remoteView;
 
         // Create KVS client
@@ -217,11 +214,6 @@ class Viewer {
             this.peerConnection = null;
         }
 
-        if (this.localStream) {
-            this.localStream.getTracks().forEach(track => track.stop());
-            this.localStream = null;
-        }
-
         if (this.remoteStream) {
             this.remoteStream.getTracks().forEach(track => track.stop());
             this.remoteStream = null;
@@ -230,10 +222,6 @@ class Viewer {
         if (this.peerConnectionStatsInterval) {
             clearInterval(this.peerConnectionStatsInterval);
             this.peerConnectionStatsInterval = null;
-        }
-
-        if (this.localView) {
-            this.localView.srcObject = null;
         }
 
         if (this.remoteView) {
@@ -245,7 +233,7 @@ class Viewer {
         }
     }
 
-    sendMessage(message) {
+    sendMessage(message: string) {
         if (this.dataChannel) {
             try {
                 this.dataChannel.send(message);
