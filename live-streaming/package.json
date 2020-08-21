@@ -1,0 +1,9 @@
+{
+  "name": "online",
+  "version": "1.0.0",
+  "scripts": {},
+  "dependencies": {
+    "amazon-kinesis-video-streams-webrtc": "^1.0.8",
+    "aws-sdk": "^2.738.0"
+  }
+}
