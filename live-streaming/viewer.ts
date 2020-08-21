@@ -1,16 +1,12 @@
 import KinesisVideo from 'aws-sdk/clients/kinesisvideo';
 import KinesisVideoSignalingChannels from 'aws-sdk/clients/kinesisvideosignalingchannels';
 import { SignalingClient, Role } from 'amazon-kinesis-video-streams-webrtc';
+import { v4 as uuidv4 } from 'uuid';
 
 interface FormValues {
     region: string;
     channelName: string;
-    clientId: string;
-    sendVideo: boolean;
-    sendAudio: boolean;
     openDataChannel: boolean;
-    widescreen: boolean;
-    fullscreen: boolean;
     useTrickleICE: boolean;
     natTraversalDisabled: boolean;
     forceTURN: boolean;
@@ -21,6 +17,7 @@ interface FormValues {
 }
 
 class Viewer {
+    clientId: string;
     localView: HTMLVideoElement;
     remoteView: HTMLVideoElement;
     signalingClient: SignalingClient;
@@ -29,6 +26,10 @@ class Viewer {
     peerConnectionStatsInterval: NodeJS.Timeout;
     localStream: MediaStream;
     remoteStream: MediaStream;
+
+    constructor() {
+        this.clientId = uuidv4();
+    }
 
     async start(localView: HTMLVideoElement, remoteView: HTMLVideoElement, formValues: FormValues, onStatsReport, onRemoteDataMessage) {
         this.localView = localView;
@@ -103,7 +104,7 @@ class Viewer {
         this.signalingClient = new SignalingClient({
             channelARN,
             channelEndpoint: endpointsByProtocol['WSS'],
-            clientId: formValues.clientId,
+            clientId: this.clientId,
             role: Role.VIEWER,
             region: formValues.region,
             credentials: {
@@ -114,11 +115,6 @@ class Viewer {
             systemClockOffset: kinesisVideoClient.config.systemClockOffset,
         });
 
-        const resolution = formValues.widescreen ? { width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 640 }, height: { ideal: 480 } };
-        const constraints = {
-            video: formValues.sendVideo ? resolution : false,
-            audio: formValues.sendAudio,
-        };
         const configuration = {
             iceServers,
             iceTransportPolicy: formValues.forceTURN ? 'relay' : 'all',
@@ -136,20 +132,6 @@ class Viewer {
 
         this.signalingClient.on('open', async () => {
             console.log('[VIEWER] Connected to signaling service');
-
-            // Get a stream from the webcam, add it to the peer connection, and display it in the local view.
-            // If no video/audio needed, no need to request for the sources. 
-            // Otherwise, the browser will throw an error saying that either video or audio has to be enabled.
-            if (formValues.sendVideo || formValues.sendAudio) {
-                try {
-                    this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    this.localStream.getTracks().forEach(track => this.peerConnection.addTrack(track, this.localStream));
-                    localView.srcObject = this.localStream;
-                } catch (e) {
-                    console.error('[VIEWER] Could not find webcam');
-                    return;
-                }
-            }
 
             // Create an SDP offer to send to the master
             console.log('[VIEWER] Creating SDP offer');
