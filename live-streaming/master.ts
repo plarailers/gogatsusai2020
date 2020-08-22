@@ -26,6 +26,11 @@ class Master {
     peerConnectionStatsInterval: NodeJS.Timeout;
     localStream: MediaStream;
 
+    constructor() {
+        this.peerConnectionByClientId = {};
+        this.dataChannelByClientId = {};
+    }
+
     async start(localView: HTMLVideoElement, formValues: FormValues, onStatsReport, onRemoteDataMessage) {
         this.localView = localView;
 
