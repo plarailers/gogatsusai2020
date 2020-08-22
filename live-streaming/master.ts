@@ -5,8 +5,6 @@ import { SignalingClient, Role } from 'amazon-kinesis-video-streams-webrtc';
 interface FormValues {
     region: string;
     channelName: string;
-    sendVideo: boolean;
-    sendAudio: boolean;
     openDataChannel: boolean;
     widescreen: boolean;
     useTrickleICE: boolean;
@@ -118,21 +116,17 @@ class Master {
         };
 
         const resolution = formValues.widescreen ? { width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 640 }, height: { ideal: 480 } };
-        const constraints = {
-            video: formValues.sendVideo ? resolution : false,
-            audio: formValues.sendAudio,
+        const constraints: MediaStreamConstraints = {
+            video: resolution,
+            audio: true,
         };
 
-        // Get a stream from the webcam and display it in the local view. 
-        // If no video/audio needed, no need to request for the sources. 
-        // Otherwise, the browser will throw an error saying that either video or audio has to be enabled.
-        if (formValues.sendVideo || formValues.sendAudio) {
-            try {
-                this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                localView.srcObject = this.localStream;
-            } catch (e) {
-                console.error('[MASTER] Could not find webcam');
-            }
+        // Get a stream from the webcam and display it in the local view.
+        try {
+            this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+            localView.srcObject = this.localStream;
+        } catch (e) {
+            console.error('[MASTER] Could not find webcam');
         }
 
         this.signalingClient.on('open', async () => {
