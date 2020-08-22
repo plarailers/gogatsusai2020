@@ -243,3 +243,7 @@ class Viewer {
         }
     }
 }
+
+if (typeof window !== 'undefined') {
+    window['Viewer'] = Viewer;
+}

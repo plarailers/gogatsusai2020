@@ -263,3 +263,7 @@ class Master {
         });
     }
 }
+
+if (typeof window !== 'undefined') {
+    window['Master'] = Master;
+}
