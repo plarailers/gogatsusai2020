@@ -112,7 +112,7 @@ class Viewer {
             systemClockOffset: kinesisVideoClient.config.systemClockOffset,
         });
 
-        const configuration = {
+        const configuration: RTCConfiguration = {
             iceServers,
             iceTransportPolicy: formValues.forceTURN ? 'relay' : 'all',
         };

@@ -110,7 +110,7 @@ class Master {
         }
         console.log('[MASTER] ICE servers: ', iceServers);
 
-        const configuration = {
+        const configuration: RTCConfiguration = {
             iceServers,
             iceTransportPolicy: formValues.forceTURN ? 'relay' : 'all',
         };
