@@ -19,7 +19,15 @@ void setup() {
     //myPort = new Serial(this, "/dev/cu.Bluetooth-Incoming-Port", 115200);//Macテスト用
   }
   if (isWindows) {
-    myPort = new Serial(this, "COM5", 115200);//Windows
+    // Bluetooth接続可能なデバイスを列挙
+    ArrayList<BluetoothDevice> deviceList = discoverBluetoothDevicesForWindows();
+    printArray(deviceList);
+    for (BluetoothDevice device : deviceList) {
+      if (device.name.equals("ESP32-Dr.")) {
+        myPort = new Serial(this, device.port, 115200);
+        break;
+      }
+    }
   }
   println(getTime(), "Bluetooth connected");
   wsc = new WebsocketClient(this, "wss://60jt3xl73m.execute-api.ap-northeast-1.amazonaws.com/dev");
