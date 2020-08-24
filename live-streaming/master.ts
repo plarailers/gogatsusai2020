@@ -1,8 +1,9 @@
+import EventEmitter from 'events';
 import KinesisVideo from 'aws-sdk/clients/kinesisvideo';
 import KinesisVideoSignalingChannels from 'aws-sdk/clients/kinesisvideosignalingchannels';
 import { SignalingClient, Role } from 'amazon-kinesis-video-streams-webrtc';
 
-interface FormValues {
+interface MasterOptions {
     region: string;
     channelName: string;
     openDataChannel: boolean;
@@ -16,7 +17,8 @@ interface FormValues {
     sessionToken?: string;
 }
 
-class Master {
+class Master extends EventEmitter {
+    options: MasterOptions;
     localView: HTMLVideoElement;
     signalingClient: SignalingClient;
     peerConnectionByClientId: { [K: string]: RTCPeerConnection };
@@ -24,28 +26,45 @@ class Master {
     peerConnectionStatsInterval: NodeJS.Timeout;
     localStream: MediaStream;
 
-    constructor() {
+    constructor(options: Partial<MasterOptions> = {}) {
+        super();
+        this.options = {
+            region: null,
+            channelName: null,
+            openDataChannel: false,
+            widescreen: false,
+            useTrickleICE: true,
+            natTraversalDisabled: false,
+            forceTURN: false,
+            accessKeyId: null,
+            secretAccessKey: null,
+            ...options,
+        };
+        this.localView = null;
+        this.signalingClient = null;
         this.peerConnectionByClientId = {};
         this.dataChannelByClientId = {};
+        this.peerConnectionStatsInterval = null;
+        this.localStream = null;
     }
 
-    async start(localView: HTMLVideoElement, formValues: FormValues, onStatsReport, onRemoteDataMessage) {
+    async start(localView: HTMLVideoElement) {
         this.localView = localView;
 
         // Create KVS client
         const kinesisVideoClient = new KinesisVideo({
-            region: formValues.region,
-            accessKeyId: formValues.accessKeyId,
-            secretAccessKey: formValues.secretAccessKey,
-            sessionToken: formValues.sessionToken,
-            endpoint: formValues.endpoint,
+            region: this.options.region,
+            accessKeyId: this.options.accessKeyId,
+            secretAccessKey: this.options.secretAccessKey,
+            sessionToken: this.options.sessionToken,
+            endpoint: this.options.endpoint,
             correctClockSkew: true,
         });
 
         // Get signaling channel ARN
         const describeSignalingChannelResponse = await kinesisVideoClient
             .describeSignalingChannel({
-                ChannelName: formValues.channelName,
+                ChannelName: this.options.channelName,
             })
             .promise();
         const channelARN = describeSignalingChannelResponse.ChannelInfo.ChannelARN;
@@ -72,21 +91,21 @@ class Master {
             channelARN,
             channelEndpoint: endpointsByProtocol['WSS'],
             role: Role.MASTER,
-            region: formValues.region,
+            region: this.options.region,
             credentials: {
-                accessKeyId: formValues.accessKeyId,
-                secretAccessKey: formValues.secretAccessKey,
-                sessionToken: formValues.sessionToken,
+                accessKeyId: this.options.accessKeyId,
+                secretAccessKey: this.options.secretAccessKey,
+                sessionToken: this.options.sessionToken,
             },
             systemClockOffset: kinesisVideoClient.config.systemClockOffset,
         });
 
         // Get ICE server configuration
         const kinesisVideoSignalingChannelsClient = new KinesisVideoSignalingChannels({
-            region: formValues.region,
-            accessKeyId: formValues.accessKeyId,
-            secretAccessKey: formValues.secretAccessKey,
-            sessionToken: formValues.sessionToken,
+            region: this.options.region,
+            accessKeyId: this.options.accessKeyId,
+            secretAccessKey: this.options.secretAccessKey,
+            sessionToken: this.options.sessionToken,
             endpoint: endpointsByProtocol['HTTPS'],
             correctClockSkew: true,
         });
@@ -96,10 +115,10 @@ class Master {
             })
             .promise();
         const iceServers = [];
-        if (!formValues.natTraversalDisabled && !formValues.forceTURN) {
-            iceServers.push({ urls: `stun:stun.kinesisvideo.${formValues.region}.amazonaws.com:443` });
+        if (!this.options.natTraversalDisabled && !this.options.forceTURN) {
+            iceServers.push({ urls: `stun:stun.kinesisvideo.${this.options.region}.amazonaws.com:443` });
         }
-        if (!formValues.natTraversalDisabled) {
+        if (!this.options.natTraversalDisabled) {
             getIceServerConfigResponse.IceServerList.forEach(iceServer =>
                 iceServers.push({
                     urls: iceServer.Uris,
@@ -112,10 +131,10 @@ class Master {
 
         const configuration: RTCConfiguration = {
             iceServers,
-            iceTransportPolicy: formValues.forceTURN ? 'relay' : 'all',
+            iceTransportPolicy: this.options.forceTURN ? 'relay' : 'all',
         };
 
-        const resolution = formValues.widescreen ? { width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 640 }, height: { ideal: 480 } };
+        const resolution = this.options.widescreen ? { width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 640 }, height: { ideal: 480 } };
         const constraints: MediaStreamConstraints = {
             video: resolution,
             audio: true,
@@ -140,16 +159,16 @@ class Master {
             const peerConnection = new RTCPeerConnection(configuration);
             this.peerConnectionByClientId[remoteClientId] = peerConnection;
 
-            if (formValues.openDataChannel) {
+            if (this.options.openDataChannel) {
                 this.dataChannelByClientId[remoteClientId] = peerConnection.createDataChannel('kvsDataChannel');
                 peerConnection.ondatachannel = event => {
-                    event.channel.onmessage = onRemoteDataMessage;
+                    event.channel.onmessage = message => this.emit('message', message);
                 };
             }
 
             // Poll for connection stats
             if (!this.peerConnectionStatsInterval) {
-                this.peerConnectionStatsInterval = setInterval(() => peerConnection.getStats().then(onStatsReport), 1000);
+                this.peerConnectionStatsInterval = setInterval(() => peerConnection.getStats().then(stats => this.emit('stats', stats)), 1000);
             }
 
             // Send any ICE candidates to the other peer
@@ -158,7 +177,7 @@ class Master {
                     console.log('[MASTER] Generated ICE candidate for client: ' + remoteClientId);
 
                     // When trickle ICE is enabled, send the ICE candidates as they are generated.
-                    if (formValues.useTrickleICE) {
+                    if (this.options.useTrickleICE) {
                         console.log('[MASTER] Sending ICE candidate to client: ' + remoteClientId);
                         this.signalingClient.sendIceCandidate(candidate, remoteClientId);
                     }
@@ -166,7 +185,7 @@ class Master {
                     console.log('[MASTER] All ICE candidates have been generated for client: ' + remoteClientId);
 
                     // When trickle ICE is disabled, send the answer now that all the ICE candidates have ben generated.
-                    if (!formValues.useTrickleICE) {
+                    if (!this.options.useTrickleICE) {
                         console.log('[MASTER] Sending SDP answer to client: ' + remoteClientId);
                         this.signalingClient.sendSdpAnswer(peerConnection.localDescription, remoteClientId);
                     }
@@ -189,7 +208,7 @@ class Master {
             );
 
             // When trickle ICE is enabled, send the answer now and then send ICE candidates as they are generated. Otherwise wait on the ICE candidates.
-            if (formValues.useTrickleICE) {
+            if (this.options.useTrickleICE) {
                 console.log('[MASTER] Sending SDP answer to client: ' + remoteClientId);
                 this.signalingClient.sendSdpAnswer(peerConnection.localDescription, remoteClientId);
             }

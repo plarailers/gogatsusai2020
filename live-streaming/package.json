@@ -1,6 +1,6 @@
 {
   "name": "online",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "scripts": {
     "build:master": "parcel build master.ts --no-source-maps",
     "build:viewer": "parcel build viewer.ts --no-source-maps"

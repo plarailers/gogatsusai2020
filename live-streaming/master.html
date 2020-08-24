@@ -19,21 +19,24 @@
       var playButton = document.getElementById('play-button');
       var stopButton = document.getElementById('stop-button');
 
-      var master = new Master();
+      var master = null;
 
       playButton.addEventListener('click', function () {
-        master.start(localView, {
+        master = new Master({
           region: document.getElementById('region').value,
           channelName: document.getElementById('channel-name').value,
           accessKeyId: document.getElementById('access-key-id').value,
           secretAccessKey: document.getElementById('secret-access-key').value,
-          useTrickleICE: true,
         });
+        master.start(localView);
         localView.play();
       });
 
       stopButton.addEventListener('click', function () {
-        master.stop();
+        if (master) {
+          master.stop();
+          master = null;
+        }
         localView.pause();
       });
     </script>
