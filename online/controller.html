@@ -35,20 +35,29 @@
     </div>
     <div id="content">
       <div id="controller">
-        <div id="movie"></div>
+        <video id="movie"></video>
         <div id="mascon_area">
           <input type="range" id="speed" value="0" min="0" max="255" step="1">
         </div>
       </div>
     </div>
     
-    
+    <script src="viewer.js"></script>
   </body>
 </html>
 
 <script>
   var ws = new WebSocket('wss://60jt3xl73m.execute-api.ap-northeast-1.amazonaws.com/dev');  // サーバ通信用のwebsocket
+  var viewer = new Viewer({
+    region: 'ap-northeast-1',
+    channelName: 'gogatsusai2020_channel',
+    accessKeyId: 'AKIAU5TGDYHCZZUKO3HU',
+    secretAccessKey: '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'
+  });
   var speed = 0;
+
+  var movie = document.getElementById('movie');
+  var playing = false;
 
   // 【スピードをサーバに送信】0.4secおきに送信する
   var timer;
@@ -100,6 +109,11 @@
           var endTime = new Date(response.endTime);
           document.getElementById('speed').style.pointerEvents = 'all';  // ハンドルの操作を許可
           message.innerText = 'パスワードを確認しました！　' + endTime.getHours() + '時' + endTime.getMinutes() + '分 まで自由に運転できます。';
+          if (!playing) {
+            playing = true;
+            viewer.start(movie);  // 通信の確立
+            movie.play();  // 動画の再生
+          }
           break;
         case 1:
           message.innerText = 'システムエラーが発生しました。xxまでご連絡ください。エラーコード:1';
