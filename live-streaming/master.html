@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>Master</title>
+  </head>
+  <body>
+    <h1>Master</h1>
+    <div>Region: <input id="region"></div>
+    <div>Channel Name: <input id="channel-name"></div>
+    <div>Access Key ID: <input id="access-key-id"></div>
+    <div>Secret Access Key: <input id="secret-access-key"></div>
+    <video id="local-view"></video>
+    <button id="play-button">Play</button>
+    <button id="stop-button">Stop</button>
+    <script src="dist/master.js"></script>
+    <script>
+      var localView = document.getElementById('local-view');
+      var playButton = document.getElementById('play-button');
+      var stopButton = document.getElementById('stop-button');
+
+      var master = new Master();
+
+      playButton.addEventListener('click', function () {
+        master.start(localView, {
+          region: document.getElementById('region').value,
+          channelName: document.getElementById('channel-name').value,
+          accessKeyId: document.getElementById('access-key-id').value,
+          secretAccessKey: document.getElementById('secret-access-key').value,
+          useTrickleICE: true,
+        });
+        localView.play();
+      });
+
+      stopButton.addEventListener('click', function () {
+        master.stop();
+        localView.pause();
+      });
+    </script>
+  </body>
+</html>

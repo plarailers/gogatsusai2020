@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>Viewer</title>
+  </head>
+  <body>
+    <h1>Viewer</h1>
+    <div>Region: <input id="region"></div>
+    <div>Channel Name: <input id="channel-name"></div>
+    <div>Access Key ID: <input id="access-key-id"></div>
+    <div>Secret Access Key: <input id="secret-access-key"></div>
+    <video id="remote-view"></video>
+    <button id="play-button">Play</button>
+    <button id="stop-button">Stop</button>
+    <script src="dist/viewer.js"></script>
+    <script>
+      var remoteView = document.getElementById('remote-view');
+      var playButton = document.getElementById('play-button');
+      var stopButton = document.getElementById('stop-button');
+
+      var viewer = new Viewer();
+
+      playButton.addEventListener('click', function () {
+        viewer.start(remoteView, {
+          region: document.getElementById('region').value,
+          channelName: document.getElementById('channel-name').value,
+          accessKeyId: document.getElementById('access-key-id').value,
+          secretAccessKey: document.getElementById('secret-access-key').value,
+          useTrickleICE: true,
+        });
+        remoteView.play();
+      });
+
+      stopButton.addEventListener('click', function () {
+        viewer.stop();
+        remoteView.pause();
+      });
+    </script>
+  </body>
+</html>
