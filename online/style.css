@@ -171,7 +171,7 @@ iframe{
 }
 
 /* マスコン */
-#speed{
+#mascon{
   -webkit-appearance: none;
   background: none;
   padding: 0;
@@ -181,10 +181,10 @@ iframe{
   transform: rotate(-90deg);
   pointer-events: none;  /* 操作不可 */
 }
-#speed:focus{
+#mascon:focus{
   outline: none;
 }
-#speed::-webkit-slider-thumb{
+#mascon::-webkit-slider-thumb{
   -webkit-appearance: none;
   background: #000;
   box-shadow: 0px 0px 3px #000;
@@ -193,7 +193,7 @@ iframe{
   width: 20px;
   margin-top: -35px;
 }
-#speed::-moz-range-thumb{
+#mascon::-moz-range-thumb{
   background: #000;
   box-shadow: 0px 0px 3px #000;
   border-radius: 30%;
@@ -202,22 +202,22 @@ iframe{
   margin-top: -35px;
 }
 /* 横軸 */
-#speed::-webkit-slider-runnable-track{
+#mascon::-webkit-slider-runnable-track{
   background: #888;
   box-shadow: 0px 0px -5px #AAA;
   height: 10px;
 }
-#speed::-moz-range-track{
+#mascon::-moz-range-track{
   background: #888;
   box-shadow: 0px 0px -5px #AAA;
   height: 10px;
 }
-#speed::-ms-track{
+#mascon::-ms-track{
   background: #888;
   box-shadow: 0px 0px -5px #AAA;
   height: 10px;
 }
 /* 現在の数値を非表示 */
-#speed::-ms-tooltip{
+#mascon::-ms-tooltip{
   display: none;
 }
