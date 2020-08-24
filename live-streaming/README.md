@@ -16,17 +16,16 @@ Viewer: 視聴用
 
 ```
 npm install
-npm install -g parcel-bundler
 ```
 
 ## ビルド
 
 ```
-parcel build viewer.ts
+parcel build:master
 ```
 
 ```
-parcel build master.ts
+parcel build:viewer
 ```
 
 ## 依存ライブラリ
