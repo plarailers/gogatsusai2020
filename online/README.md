@@ -11,3 +11,6 @@
 
 ### loaders.min.css
 (式部)ローディング中にチカチカするやつのCSS。https://connoratherton.com/loaders より。
+
+### viewer.js
+(三浦)WebRTCで動画をストリーミング再生する処理をまとめたもの。詳細は /live-streaming 以下。
