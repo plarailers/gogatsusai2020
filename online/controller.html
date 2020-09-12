@@ -14,7 +14,6 @@
       <h1>東大プラレーラーズ・オンライン運転体験</h1>
     </header>
     <div id="input_area">
-      <!-- https://copypet.jp/692/ より -->
       <div class="input_text">
         <input type="text" id="pw_input" placeholder="列車番号を入力">
         <i class="fas fa-subway"></i>
@@ -24,7 +23,6 @@
     <div id="message_area">
       <i id="message_icon" class="fas fa-info-circle"></i>
       <p id="message">指定された時間になったら、列車番号を入力し「運転をはじめる」を押してください。</p>
-      <!-- https://github.com/ConnorAtherton/loaders.css より -->
       <div class="loader" id="loader">  
         <div class="loader-inner ball-pulse">
           <div></div>
@@ -92,7 +90,7 @@
       message.innerText = '列車番号を確認中です。少々お待ちください。';
       loader.style.visibility = 'visible';
       sendTimer = setTimeout(function(){  // 10秒経っても応答ナシなら諦める
-        message.innerText = '五月祭会場と通信できませんでした。ネットワーク接続を確認し、もう一度お試しください。';
+        message.innerText = '五月祭会場と通信できませんでした。ページを再読み込みし、もう一度お試しください。';
         loader.style.visibility = 'hidden';
       }, 10000);
     }
@@ -110,8 +108,9 @@
         case 0:  // 列車番号正解
           var startTime = new Date(response.startTime);
           var endTime = new Date(response.endTime);
-          document.getElementById('speed').style.pointerEvents = 'all';  // ハンドルの操作を許可
-          message.innerText = '列車番号を確認しました！　' + endTime.getHours() + '時' + endTime.getMinutes() + '分 まで自由に運転できます。';
+          mascon.style.pointerEvents = 'all';  // ハンドルの操作を許可
+          mascon.title = TITLE_OK;
+          message.innerText = '列車番号を確認しました！　' + endTime.getHours() + '時' + endTime.getMinutes() + '分 まで自由に運転できます。映像が映ったら運転をはじめてください。';
           if (!playing) {
             playing = true;
             viewer.start(movie);  // 通信の確立
