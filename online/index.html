@@ -45,12 +45,13 @@
 </html>
 
 <script>
+  var searchParams = new URLSearchParams(location.search);
   var ws = new WebSocket('wss://60jt3xl73m.execute-api.ap-northeast-1.amazonaws.com/dev');  // サーバ通信用のwebsocket
   var viewer = new Viewer({
     region: 'ap-northeast-1',
     channelName: 'gogatsusai2020_channel',
-    accessKeyId: 'AKIAU5TGDYHCZZUKO3HU',
-    secretAccessKey: '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'
+    accessKeyId: searchParams.get('id'),
+    secretAccessKey: searchParams.get('key')
   });
   var speed = 0;
   const TITLE_NG = "運転するには、列車番号を入力してください";
