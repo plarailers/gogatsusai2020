@@ -11,7 +11,6 @@ interface MasterOptions {
     region: string;
     channelName: string;
     openDataChannel: boolean;
-    widescreen: boolean;
     useTrickleICE: boolean;
     natTraversalDisabled: boolean;
     forceTURN: boolean;
@@ -36,7 +35,6 @@ class Master extends EventEmitter {
             region: null,
             channelName: null,
             openDataChannel: false,
-            widescreen: false,
             useTrickleICE: true,
             natTraversalDisabled: false,
             forceTURN: false,
@@ -52,7 +50,13 @@ class Master extends EventEmitter {
         this.localStream = null;
     }
 
-    async start(localView: HTMLVideoElement) {
+    async start(
+        localView: HTMLVideoElement,
+        constraints: MediaStreamConstraints = {
+            video: true,
+            audio: true,
+        },
+    ) {
         this.localView = localView;
 
         // Create KVS client
@@ -136,12 +140,6 @@ class Master extends EventEmitter {
         const configuration: RTCConfiguration = {
             iceServers,
             iceTransportPolicy: this.options.forceTURN ? 'relay' : 'all',
-        };
-
-        const resolution = this.options.widescreen ? { width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 640 }, height: { ideal: 480 } };
-        const constraints: MediaStreamConstraints = {
-            video: resolution,
-            audio: true,
         };
 
         // Get a stream from the webcam and display it in the local view.
