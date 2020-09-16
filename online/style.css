@@ -135,6 +135,7 @@ p#message {
   padding: 12px;
 }
 #controller{
+  position: relative;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -154,6 +155,10 @@ iframe{
   width: 100%;
   height: 100%;
   margin: 0 auto;
+}
+#instruction{
+  position: absolute;
+  width: 75%;
 }
 
 #mascon_area{
