@@ -14,6 +14,9 @@
 #
 # データ削除（5分間のもののみ）
 #   python tools/pw.py clear
+#
+# テスト
+#   python tools/pw.py test
 
 import sys
 import random
@@ -23,6 +26,8 @@ import boto3
 
 dynamoDB = boto3.resource('dynamodb')
 table = dynamoDB.Table('gogatsusai2020-backend-passwords-dev')
+
+JST = datetime.timezone(datetime.timedelta(hours=+9))
 
 def scan():
     data = table.scan()
@@ -34,15 +39,13 @@ def scan():
 def generate(write=False):
     start_time_list = []
     # 9/20 9:00 から 10 分おきに、18:00 まで
-    start_time_list.extend((2020, 9, 20, h, m, 0) for h in range(9, 18) for m in range(0, 60, 10))
+    start_time_list.extend(datetime.datetime(2020, 9, 20, h, m, 0, tzinfo=JST) for h in range(9, 18) for m in range(0, 60, 10))
     # 9/21 9:00 から 10 分おきに、18:00 まで
-    start_time_list.extend((2020, 9, 21, h, m, 0) for h in range(9, 18) for m in range(0, 60, 10))
-    JST = datetime.timezone(datetime.timedelta(hours=+9))
+    start_time_list.extend(datetime.datetime(2020, 9, 21, h, m, 0, tzinfo=JST) for h in range(9, 18) for m in range(0, 60, 10))
     items = []
     for start_time in start_time_list:
         # 数字4桁 + 英大文字1文字
         password = '%04d%c' % (random.randint(0000, 9999), random.randint(ord('A'), ord('Z')))
-        start_time = datetime.datetime(*start_time, tzinfo=JST)
         end_time = start_time + datetime.timedelta(minutes=5)
         items.append({
             'Password': password,
@@ -67,6 +70,21 @@ def clear():
                 batch.delete_item(Key={'Password': item['Password']})
     print('done')
 
+# - すべての時間が存在しているか？
+def test():
+    start_time_list = []
+    # 9/20 9:00 から 10 分おきに、18:00 まで
+    start_time_list.extend(datetime.datetime(2020, 9, 20, h, m, 0, tzinfo=JST) for h in range(9, 18) for m in range(0, 60, 10))
+    # 9/21 9:00 から 10 分おきに、18:00 まで
+    start_time_list.extend(datetime.datetime(2020, 9, 21, h, m, 0, tzinfo=JST) for h in range(9, 18) for m in range(0, 60, 10))
+    data = table.scan()
+    items = data['Items']
+    print('checking', len(items), 'items')
+    for start_time in start_time_list:
+        if start_time not in map(lambda item: dateutil.parser.parse(item['StartTime']), items):
+            raise Exception(start_time)
+    print('done')
+
 def main(cmd):
     if cmd == 'scan':
         scan()
@@ -76,6 +94,8 @@ def main(cmd):
         generate(write=True)
     if cmd == 'clear':
         clear()
+    if cmd == 'test':
+        test()
 
 if __name__ == '__main__':
     main(*sys.argv[1:])
