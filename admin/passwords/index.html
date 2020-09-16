@@ -87,13 +87,25 @@
         });
       }
 
-      function addItem() {
+      function addItem(password, startTime, endTime) {
         getClient().put({
           TableName: 'gogatsusai2020-backend-passwords-dev',
           Item: {
-            Password: 'aaaa',
-            StartTime: moment().toISOString(),
-            EndTime: moment().add(1, 'y').toISOString(),
+            Password: password,
+            StartTime: moment(startTime).toISOString(),
+            EndTime: moment(endTime).toISOString(),
+          },
+        }).promise().then((data) => {
+          console.log(data);
+          listItems();
+        });
+      }
+
+      function deleteItem(password) {
+        getClient().delete({
+          TableName: 'gogatsusai2020-backend-passwords-dev',
+          Key: {
+            Password: password,
           },
         }).promise().then((data) => {
           console.log(data);
