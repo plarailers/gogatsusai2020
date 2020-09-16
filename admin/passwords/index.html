@@ -65,13 +65,17 @@
         }
       }
 
+      function sortedByStartTime(items) {
+        return items.slice().sort((a, b) => Date.parse(a.StartTime) - Date.parse(b.StartTime));
+      }
+
       function listItems() {
         getClient().scan({
           TableName: 'gogatsusai2020-backend-passwords-dev',
         }).promise().then((data) => {
           console.log(data);
           clearTable();
-          for (const item of data.Items) {
+          for (const item of sortedByStartTime(data.Items)) {
             const password = item.Password;
             const startTime = moment(item.StartTime);
             const endTime = moment(item.EndTime);
@@ -80,6 +84,20 @@
             row.insertCell().appendChild(document.createTextNode(startTime.format()));
             row.insertCell().appendChild(document.createTextNode(endTime.format()));
           }
+        });
+      }
+
+      function addItem() {
+        getClient().put({
+          TableName: 'gogatsusai2020-backend-passwords-dev',
+          Item: {
+            Password: 'aaaa',
+            StartTime: moment().toISOString(),
+            EndTime: moment().add(1, 'y').toISOString(),
+          },
+        }).promise().then((data) => {
+          console.log(data);
+          listItems();
         });
       }
 
