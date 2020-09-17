@@ -2,6 +2,7 @@
  * Refer to https://github.com/awslabs/amazon-kinesis-video-streams-webrtc-sdk-js/blob/master/examples/master.js
  */
 
+import 'webrtc-adapter';
 import EventEmitter from 'events';
 import KinesisVideo from 'aws-sdk/clients/kinesisvideo';
 import KinesisVideoSignalingChannels from 'aws-sdk/clients/kinesisvideosignalingchannels';
