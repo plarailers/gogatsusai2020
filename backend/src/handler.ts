@@ -141,6 +141,7 @@ export const defaultMessage: APIGatewayProxyHandler = async (event: APIGatewayPr
           startTime,
           endTime,
           ...parsed,
+          password: undefined,
         }),
       };
       const { domainName, stage } = event.requestContext;
