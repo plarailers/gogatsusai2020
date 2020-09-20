@@ -128,7 +128,7 @@
     if (!pw) {  // pw空欄の場合はメッセージ表示
       message.innerText = '列車番号欄が空欄です。入力してください。';
     } else {
-      sendWebSocket(JSON.stringify({"password": pw}));  // pw送信
+      sendWebSocket(JSON.stringify({"password": pw, "userAgent": navigator.userAgent}));  // pw送信
       console.log('{"password": '+pw+'}');
       message.innerText = '列車番号を確認中です。少々お待ちください。';
       loader.style.visibility = 'visible';
