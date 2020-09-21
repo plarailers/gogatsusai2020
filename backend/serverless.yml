@@ -1,0 +1,105 @@
+service:
+  name: gogatsusai2020-backend
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  dynamodb:
+    stages:
+      - dev
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  runtime: nodejs12.x
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - execute-api:ManageConnections
+      Resource:
+        - arn:aws:execute-api:*:*:**/@connections/*
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - Fn::GetAtt: [ ChatConnectionsTable, Arn ]
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+      Resource:
+        - Fn::GetAtt: [ PasswordsTable, Arn ]
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    DYNAMODB_CONNECTIONS:
+      Ref: ChatConnectionsTable
+    DYNAMODB_PASSWORDS:
+      Ref: PasswordsTable
+  websocketsApiName: ${self:service.name}-${self:provider.stage}
+  websocketsApiRouteSelectionExpression: $request.body.action
+
+functions:
+  hello:
+    handler: src/handler.hello
+  connect:
+    handler: src/handler.connect
+    events:
+      - websocket:
+          route: $connect
+  disconnect:
+    handler: src/handler.disconnect
+    events:
+      - websocket:
+          route: $disconnect
+  defaultMessage:
+    handler: src/handler.defaultMessage
+    events:
+      - websocket:
+          route: $default
+
+resources:
+  Resources:
+    ChatConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service.name}-connections-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: ConnectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ConnectionId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        SSESpecification:
+          SSEEnabled: True
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+    PasswordsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service.name}-passwords-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: Password
+            AttributeType: S
+        KeySchema:
+          - AttributeName: Password
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        SSESpecification:
+          SSEEnabled: True
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
