@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>配信画面 | 第93回五月祭 東京大学プラレーラーズ</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  </head>
+  <body>
+    <header class="navbar navbar-dark bg-dark">
+      <span class="navbar-brand">Master</span>
+    </header>
+    <div class="container py-3">
+      <form>
+        <div class="form-group row">
+          <label for="access-key-id" class="col-sm-3 col-form-label">Access Key ID</label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control" id="access-key-id">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="secret-access-key" class="col-sm-3 col-form-label">Secret Access Key</label>
+          <div class="col-sm-9">
+            <input type="password" class="form-control" id="secret-access-key">
+          </div>
+        </div>
+      </form>
+      <video id="local-view"></video>
+      <form class="form-inline">
+        <select class="custom-select" id="devices"></select>
+        <button type="button" class="btn btn-primary ml-2" id="play-button">Play</button>
+        <button type="button" class="btn btn-secondary ml-2" id="stop-button">Stop</button>
+      </form>
+    </div>
+    <script src="master.js"></script>
+    <script>
+      var localView = document.getElementById('local-view');
+      var playButton = document.getElementById('play-button');
+      var stopButton = document.getElementById('stop-button');
+
+      var master = null;
+
+      (function () {
+        document.getElementById('access-key-id').value = localStorage.getItem('accessKeyId');
+        document.getElementById('secret-access-key').value = localStorage.getItem('secretAccessKey');
+
+        playButton.disabled = false;
+        stopButton.disabled = true;
+      })();
+
+      navigator.mediaDevices.enumerateDevices().then(function (devices) {
+        console.log(devices);
+        var select = document.getElementById("devices");
+        devices.forEach(function (device) {
+          if (device.kind === "videoinput") {
+            var option = document.createElement("option");
+            option.label = device.label;
+            option.value = device.deviceId;
+            select.add(option);
+          }
+        });
+      });
+
+      playButton.addEventListener('click', function () {
+        var accessKeyId = document.getElementById('access-key-id').value;
+        var secretAccessKey = document.getElementById('secret-access-key').value;
+        localStorage.setItem('accessKeyId', accessKeyId);
+        localStorage.setItem('secretAccessKey', secretAccessKey);
+        master = new Master({
+          region: 'ap-northeast-1',
+          channelName: 'gogatsusai2020_channel',
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+        });
+        master.start(localView, {
+          video: {
+            deviceId: document.getElementById('devices').value,
+          },
+          audio: true,
+        });
+        localView.play();
+        playButton.disabled = true;
+        stopButton.disabled = false;
+      });
+
+      stopButton.addEventListener('click', function () {
+        if (master) {
+          master.stop();
+          master = null;
+        }
+        localView.pause();
+        playButton.disabled = false;
+        stopButton.disabled = true;
+      });
+    </script>
+  </body>
+</html>
