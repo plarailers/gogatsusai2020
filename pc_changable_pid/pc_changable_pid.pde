@@ -16,7 +16,7 @@ void setup() {
   boolean isWindows = osName.startsWith("Windows");
   //Bluetoothのシリアルを選択
   if (isMac) {
-    myPort = new Serial(this, "/dev/cu.ESP32-ESP32SPP", 115200);//Mac
+    myPort = new Serial(this, "/dev/cu.ESP32-Dr-ESP32SPP", 115200);//Mac
     //myPort = new Serial(this, "/dev/cu.Bluetooth-Incoming-Port", 115200);//Macテスト用
   }
   if (isWindows) {
@@ -52,8 +52,9 @@ void webSocketEvent(String msg) {
     int tmp_speed = json_msg.getInt("speed");
     speed_id = speed_constrain(tmp_speed);
     println(getTime(), "[WebController:speed_id]", speed_id);
-    if (speed == 0) {  // 止まっているときは動かしてあげる
-      int input = pidCalc(speed_id);
+    if (speed == 0.0) {  // 止まっているときは動かしてあげる
+      int input = INPUT_START;//pidCalc(speed_id);
+      println("input=INPUT_START");
       myPort.write(input);
     }
   }
